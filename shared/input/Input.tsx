@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, TextInput, TextInputProps, View } from "react-native";
 import { useState } from "react";
 import EyeClosedIcon from "../../assets/icons/EyeClosedIcon";
+import EyeOpenedIcon from "../../assets/icons/EyeOpenedIcon";
 import LockGrayIcon from "../../assets/icons/LockGrayIcon";
 import LockOrangeIcon from "../../assets/icons/LockOrangeIcon";
 import PersonGrayIcon from "../../assets/icons/PersonGrayIcon";
 import PersonOrangeIcon from "../../assets/icons/PersonOrangeIcon";
-import EyeOpenedIcon from "../../assets/icons/EyeOpenedIcon";
 
 export function Input({ isPassword, isEmail, ...props }: TextInputProps & { isPassword?: boolean; isEmail?: boolean }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
