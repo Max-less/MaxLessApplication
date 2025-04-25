@@ -22,19 +22,37 @@ import LogoIcon from './assets/icons/LogoIcon';
 import ArrowRightIcon from './assets/icons/ArrowRightIcon';
 import NewHobbyIcon from './assets/icons/NewHobbyIcon';
 import { BlurView, VibrancyView } from "@react-native-community/blur";
+import AddNewPictureIcon from './assets/icons/AddNewPictureIcon';
+import BackGroundGradientOrange from './assets/icons/BackGroundGradientOrange';
+import ArrowToBack from './assets/icons/ArrowToBack';
+import PaintOpacityArt from './assets/icons/PaintOpacityArt';
+import WhiteRectangle from './assets/icons/WhiteRectangle';
 
 
+type HobbiesScreenProps = {
+  navigation: {
+    goBack: () => void;
+    navigateToDrawing: () => void;
+  };
+};
 
-
-type RegistrationScreenProps = {
+type DrawingScreenProps = {
   navigation: {
     goBack: () => void;
   };
 };
 
-type HobbiesScreenProps = {
+type RegistrationScreenProps = {
   navigation: {
     goBack: () => void;
+    navigateToSuccess: () => void;
+  };
+};
+
+type RegistrationSuccessScreenProps = {
+  navigation: {
+    goBack: () => void;
+    setCurrentScreen: (screen: 'login' | 'registration' | 'hobbies' | 'registrationSuccess') => void;
   };
 };
 
@@ -42,19 +60,36 @@ const { width, height } = Dimensions.get('window');
 
 export default function App() {
   const fontsLoaded = useFonts();
-  const [currentScreen, setCurrentScreen] = React.useState<'login' | 'registration' | 'hobbies'>('login');
+  const [currentScreen, setCurrentScreen] = React.useState<'login' | 'registration' | 'hobbies' | 'registrationSuccess' | 'drawing'>('login');
 
   if (!fontsLoaded) {
     return null;
   }
 
+  if (currentScreen === 'drawing') {
+    return <DrawingScreen navigation={{ goBack: () => setCurrentScreen('hobbies') }} />;
+  }
+
   if (currentScreen === 'registration') {
-    return <RegistrationScreen navigation={{ goBack: () => setCurrentScreen('login') }} />;
+    return <RegistrationScreen navigation={{ 
+      goBack: () => setCurrentScreen('login'),
+      navigateToSuccess: () => setCurrentScreen('registrationSuccess') // Добавляем метод
+    }} />;
+  }
+
+  if (currentScreen === 'registrationSuccess') {
+    return <RegistrationSuccessScreen navigation={{ 
+      goBack: () => setCurrentScreen('registration'),
+      setCurrentScreen: setCurrentScreen
+    }} />;
   }
 
   if (currentScreen === 'hobbies') {
-      return <HobbiesScreen navigation={{ goBack: () => setCurrentScreen('login') }} />;
-    }
+    return <HobbiesScreen navigation={{ 
+      goBack: () => setCurrentScreen('login'),
+      navigateToDrawing: () => setCurrentScreen('drawing')
+    }} />;
+  }
 
   return (
     <ImageBackground
@@ -93,6 +128,7 @@ export default function App() {
             >
               <Text style={styles.buttonText}>Войти</Text>
             </TouchableOpacity>
+
             <TouchableOpacity 
               style={styles.button2} 
               onPress={() => setCurrentScreen('registration')}
@@ -122,15 +158,6 @@ function RegistrationScreen({ navigation }: RegistrationScreenProps) {
           <Text style={styles.registrationTitle}>
             Регистрация
           </Text>
-          
-          <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Никнейм</Text>
-            <TextInput
-              style={styles.input}
-              placeholder=""
-              placeholderTextColor="#999"
-            />
-          </View>
           
           {/* Email */}
           <View style={styles.inputWrapper}>
@@ -181,11 +208,12 @@ function RegistrationScreen({ navigation }: RegistrationScreenProps) {
             </View>
           </View>
           
-          <View style={styles.separator} />
-          
           {/* Кнопка регистрации */}
-          <TouchableOpacity style={styles.mainButton}>
-            <Text style={styles.mainButtonText}>Зарегистрироваться</Text>
+          <TouchableOpacity 
+            style={styles.mainButton}
+            onPress={navigation.navigateToSuccess}
+          >
+            <Text style={styles.mainButtonText}>Далее</Text>
           </TouchableOpacity>
           
           {/* Кнопка возврата */}
@@ -201,8 +229,56 @@ function RegistrationScreen({ navigation }: RegistrationScreenProps) {
   );
 }
 
-function HobbiesScreen({ navigation }: HobbiesScreenProps) {
+function RegistrationSuccessScreen({ navigation }: RegistrationSuccessScreenProps) {
+  return (
+    <ImageBackground
+      source={require('./assets/background.png')}
+      style={styles.background}
+      resizeMode="cover"
+      imageStyle={styles.backgroundImage}
+    >
+      <View style={styles.container}>
+        <View style={styles.content}>
+          
+          {/* Круг для аватара с иконкой добавления */}
+          <View style={styles.avatarContainer}>
+            <AddNewPictureIcon />
+          </View>
 
+          <Text style={styles.registrationTitleOnAddPicture}>
+            Установите аватар
+          </Text>
+          
+          {/* Поле для никнейма */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Придумайте никнейм</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor="#999"
+            />
+          </View>
+          
+          {/* Кнопка продолжения */}
+          <TouchableOpacity 
+            style={styles.mainButton}
+            onPress={() => navigation.setCurrentScreen('hobbies')}
+          >
+            <Text style={styles.mainButtonText}>Давайте начнём!</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.secondaryButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.secondaryButtonText}>Вернуться</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+}
+function HobbiesScreen({ navigation }: HobbiesScreenProps) {
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
       <View style={styles.container}>
@@ -299,7 +375,10 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
               </View>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.hobbyItem}>
+            <TouchableOpacity 
+              style={styles.hobbyItem}
+              onPress={() => navigation.navigateToDrawing()}
+            >
               <PaintIcon />
               <View style={styles.hobbyTextWrapper}>
                 <Text style={styles.hobbyText}>РИСОВАНИЕ</Text>
@@ -324,9 +403,187 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
   );
 }
 
+function DrawingScreen({ navigation }: DrawingScreenProps) {
+  const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('tracking');
+
+  return (
+    <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
+      <View style={styles.container}>
+        <View style={styles.UpperPanel}>
+          <BackGroundGradientOrange />
+        </View>
+
+        <View style={styles.paintOpacityArtContainer}>
+          <PaintOpacityArt />
+        </View>
+
+        <View style={styles.whiteRectangleContainer}>
+          <WhiteRectangle />
+          
+          <View style={styles.tabsContainer}>
+            <View style={styles.buttonsRow}>
+              <TouchableOpacity 
+                style={styles.tabButton}
+                onPress={() => setActiveTab('tracking')}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  activeTab === 'tracking' && styles.activeTabText
+                ]}>
+                  отслеживание
+                </Text>
+              </TouchableOpacity>
+              
+              <View style={styles.gapLineContainer}>
+                <View style={[
+                  styles.gapLineLeft,
+                  activeTab === 'tracking' && styles.activeGapLine
+                ]} />
+                <View style={[
+                  styles.gapLineRight,
+                  activeTab === 'settings' && styles.activeGapLine
+                ]} />
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.tabButton}
+                onPress={() => setActiveTab('settings')}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  activeTab === 'settings' && styles.activeTabText
+                ]}>
+                  настройки
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.fullUnderline}>
+              <View style={[
+                styles.activeUnderline,
+                activeTab === 'tracking' && { width: '52%', left: '-2%' },
+                activeTab === 'settings' && { width: '50%', left: '50%' }
+              ]} />
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.ThreeStripedButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowToBack />
+        </TouchableOpacity>
+
+        <View style={styles.PaintScreenText}>
+          <Text style={styles.PaintScreenTextFonts}>рисование</Text>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.CreateNewArtHobby}
+        >
+          <NewHobbyIcon />
+        </TouchableOpacity>
+
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  tabsContainer: {
+    position: 'absolute',
+    top: '110%',
+    width: '100%',
+  },
+  
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  
+  fullUnderline: {
+    height: 2,
+    backgroundColor: '#CCCCCC',
+    marginTop: 5,
+  },
+  
+  activeUnderline: {
+    position: 'absolute',
+    height: '100%',
+    backgroundColor: '#62281B',
+  },
+  
+  gapLineContainer: {
+    width: 64,
+    flexDirection: 'row',
+  },
+  
+  gapLineLeft: {
+    width: '50%',
+    height: '100%',
+    backgroundColor: '#CCCCCC',
+  },
+  
+  gapLineRight: {
+    width: '50%',
+    height: '100%',
+    backgroundColor: '#CCCCCC',
+  },
+  
+  activeGapLine: {
+    backgroundColor: '#62281B',
+  },
+  
+  tabButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginLeft: -30, // добавлено
+  },
+  
+  tabButtonText: {
+    fontSize: 18,
+    color: '#999999',
+    fontFamily: 'IgraSans',
+  },
+  
+  activeTabText: {
+    color: '#62281B',
+  },
+
+  PaintButtonText: {
+    fontSize: 18,
+  },
+
+  trackingButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  
+  settingsButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+
+  paintOpacityArtContainer: {
+    position: 'absolute',
+    top: '0%', // Позиционируем по вертикали
+    left: '10%', // Занимаем всю ширину
+    zIndex: 1, // Чтобы был поверх градиента
+  },
+  
+  whiteRectangleContainer: {
+    bottom: '15%',
+    zIndex: 1, // Чтобы был поверх градиента
+    left: '1%',
+  },
+
   scrollViewContent: {
-    paddingBottom: height * 0.1, // space for lower panel
+    paddingBottom: height * 0.1,
   },
   container: {
     flex: 1,
@@ -346,24 +603,39 @@ const styles = StyleSheet.create({
   },
   registrationTitle: {
     fontFamily: 'IgraSans',
-    fontSize: 24,
-    color: '#000',
+    fontSize: 36,
+    color: '#62281B',
     alignSelf: 'center',
-    marginBottom: 40, // titleMargin
+    marginBottom: 62,
+    // textShadowColor: 'rgba(255, 255, 255, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
+
+  },
+  registrationTitleOnAddPicture: {
+    fontFamily: 'IgraSans',
+    fontSize: 24,
+    color: '#62281B',
+    alignSelf: 'center',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
+    marginTop: 19,
+    marginBottom: 45,
+
   },
   label: {
     fontFamily: 'IgraSans',
     fontSize: 16,
-    color: '#000',
+    color: '#62281B',
     alignSelf: 'flex-start',
     marginLeft: 10,
-    marginBottom: 8, // labelMargin
+    marginBottom: 8,
   },
   inputWrapper: {
-    marginBottom: 12, // inputSpacing
+    marginBottom: 12,
   },
   lastInputWrapper: {
-    marginBottom: 30, // sectionMargin
+    marginBottom: 30,
   },
   input: {
     width: 334,
@@ -397,12 +669,7 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 10,
   },
-  separator: {
-    height: 1,
-    backgroundColor: '#ccc',
-    width: '100%',
-    marginVertical: 20,
-  },
+  
   mainButton: {
     width: 334,
     height: 55,
@@ -410,12 +677,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6F3B',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 100,
   },
+
   mainButtonText: {
     color: '#FFFFFF',
     fontFamily: 'IgraSans',
-    fontSize: 16,
+    fontSize: 22,
+    textShadowColor: 'rgba(255, 255, 255, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   secondaryButton: {
     width: 334,
@@ -428,10 +699,23 @@ const styles = StyleSheet.create({
     borderColor: '#FF6F3B',
     marginTop: 15,
   },
+
+  avatarContainer: {
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 68,
+  },
+
   secondaryButtonText: {
     color: '#FF6F3B',
     fontFamily: 'IgraSans',
-    fontSize: 16,
+    fontSize: 20,
+    textShadowColor: 'rgba(255, 255, 255, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   
   form: {
@@ -456,8 +740,9 @@ const styles = StyleSheet.create({
   logo: {
     width: 170,
     height: 170,
-    marginBottom: 50,
     transform: [{ scale: 1.5 }],
+    marginTop: 90,
+    marginBottom: 70,
   },
   
   button: {
@@ -490,7 +775,7 @@ const styles = StyleSheet.create({
     transform: [{ scaleX: 1.15 }],
   },
   buttonText2: {
-    color: "black",
+    color: "#62281B",
     fontFamily: 'IgraSans',
     fontSize: 16,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -501,7 +786,8 @@ const styles = StyleSheet.create({
   buttonstyle: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 15
+    gap: 15,
+    marginTop: 55,
   },
   
   nicknameLabel: {
@@ -512,8 +798,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginBottom: -10,
   },
-  
-  // Обновленные стили для существующих кнопок
+
   registerButton: {
     backgroundColor: '#FF6F3B',
     justifyContent: 'center',
@@ -563,6 +848,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
+  CreateNewArtHobby: {
+    position: 'absolute',
+    bottom: 50,
+    right: 10,
+    zIndex: 1,
+    transform: [{ scale: 0.8 }],
+  },
+
   BackToMainButtonWrapper: {
     position: 'absolute',
     bottom: 20,
@@ -607,7 +900,7 @@ const styles = StyleSheet.create({
   ThreeStripedButton: {
     position: 'absolute',
     top: 70,
-    left: 50,
+    left: 31,
     zIndex: 1,
   },
   BellButton: {
@@ -627,9 +920,23 @@ const styles = StyleSheet.create({
 
   MainScreenText: {
     position: 'absolute',
-    top: 50, // Размещаем логотип в верхней части экрана
-    left: '40%', // Центрируем по горизонтали
+    top: 50,
+    left: '40%',
   },
+
+  PaintScreenText: {
+    position: 'absolute',
+    top: 51,
+    left: 100,
+  },
+
+  PaintScreenTextFonts: {
+    fontSize: 40,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  }, 
 
   leftAligned: {
     textAlign: 'left', 
@@ -640,9 +947,9 @@ const styles = StyleSheet.create({
   arrowRightIcon: {
     width: 20,
     height: 20,
-    marginLeft: 10,   // Отступ между текстом и иконкой
-    marginRight: 10,  // Отступ справа
-    marginBottom: 10,  // Отступ снизу
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 10,
   },
 
   MainScreenTextFonts: {
@@ -653,8 +960,8 @@ const styles = StyleSheet.create({
 
   LogoOnMainScreen: {
     position: 'absolute',
-    top: 40, // Размещаем логотип в верхней части экрана
-    left: '45%', // Центрируем по горизонтали
+    top: 40,
+    left: '45%',
   },
 
   LowerPanel: {
@@ -674,12 +981,12 @@ const styles = StyleSheet.create({
   },
   
   title: {
-    fontFamily: 'IgraSans',
     fontSize: 36,
-    color: '#62281B',
     marginTop: '30%',
     marginBottom: '5%',
     textAlign: 'left',
+    color: '#62281B',
+    fontFamily: 'IgraSans',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
@@ -697,7 +1004,7 @@ const styles = StyleSheet.create({
   
   
   hobbyTextWrapper: {
-    flexDirection: 'column',  // Выстраивает элементы в колонку
+    flexDirection: 'column',
     marginLeft: 15,
     flex: 1,
   },
