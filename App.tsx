@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Animated, ScrollView, View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { ScrollView, View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import { Dimensions } from 'react-native';
 import { Input } from './shared/input/Input';
-import { Button } from './shared/button/button';
 import { useFonts } from './fonts';
 import EyeClosedIcon from "./assets/icons/EyeClosedIcon";
 import EyeOpenedIcon from "./assets/icons/EyeOpenedIcon";
@@ -14,31 +13,59 @@ import BackToMainIcon from "./assets/icons/BackToMainIcon";
 import CommunityIcon from './assets/icons/CommunityIcon';
 import ThreeStripedIcon from './assets/icons/ThreeStripedIcon';
 import BellIcon from './assets/icons/BellIcon';
-import UpperPanel from './assets/icons/UpperPanelIcon';
 import LowerPanel from './assets/icons/LowerPanelIcon';
 import StarIcon from './assets/icons/StarIcon';
 import MainScreenLogo from './assets/icons/MainScreenLogo';
 import LogoIcon from './assets/icons/LogoIcon';
 import ArrowRightIcon from './assets/icons/ArrowRightIcon';
 import NewHobbyIcon from './assets/icons/NewHobbyIcon';
-import { BlurView, VibrancyView } from "@react-native-community/blur";
 import AddNewPictureIcon from './assets/icons/AddNewPictureIcon';
 import BackGroundGradientOrange from './assets/icons/BackGroundGradientOrange';
 import ArrowToBack from './assets/icons/ArrowToBack';
 import PaintOpacityArt from './assets/icons/PaintOpacityArt';
 import WhiteRectangle from './assets/icons/WhiteRectangle';
+import { styles } from './styles';
+import ActiveCommunityIcon from './assets/icons/ActiveCommunityIcon';
+import ActiveBackToMainIcon from './assets/icons/ActiveBackToMainIcon';
+import PointerRight from './assets/icons/PointerRight';
+import PointerLeft from './assets/icons/PointerLeft';
+import SwitchOffIcon from './assets/icons/SwitchOffIcon';
+import SwitchOnIcon from './assets/icons/SwitchOnIcon';
+import CloseCreatingHobbyIcon from "./assets/icons/CloseCreatingHobbyIcon";
+import AddPictureOnCreatingHobby from './assets/icons/AddPictureOnCreatingHobby';
+import ProfileCameraForChangePictureIcon from './assets/icons/ProfileCameraForChangePictureIcon';
+import ChangeNickNameIcon from './assets/icons/ChangeNickNameIcon';
 
+type ProfileScreenProps = {
+  navigation: {
+    goBack: () => void;
+    cameFrom: 'hobbies' | 'community';
+  };
+};
 
 type HobbiesScreenProps = {
   navigation: {
     goBack: () => void;
     navigateToDrawing: () => void;
+    navigateToCommunity: () => void;
+    navigateToProfile: () => void;
+    currentScreen: 'hobbies' | 'community';
+    setAsMain?: () => void;
+  };
+};
+
+type CommunityScreenProps = {
+  navigation: {
+    goBack: () => void;
+    navigateToProfile: () => void;
+    currentScreen: 'hobbies' | 'community';
   };
 };
 
 type DrawingScreenProps = {
   navigation: {
     goBack: () => void;
+    navigateToSettings: () => void;
   };
 };
 
@@ -56,24 +83,59 @@ type RegistrationSuccessScreenProps = {
   };
 };
 
+type SettingScreenProps = {
+  navigation: {
+    goBack: () => void;
+    navigate: (screen: 'drawing' | 'hobbies') => void;
+  };
+};
+
 const { width, height } = Dimensions.get('window');
+
+
 
 export default function App() {
   const fontsLoaded = useFonts();
-  const [currentScreen, setCurrentScreen] = React.useState<'login' | 'registration' | 'hobbies' | 'registrationSuccess' | 'drawing'>('login');
+  const [currentScreen, setCurrentScreen] = React.useState<'login' | 'registration' | 'hobbies' | 'registrationSuccess' | 'drawing' | 'community' | 'settings' | 'profile'>('login');
+  const [prevScreen, setPrevScreen] = React.useState<'hobbies' | 'community'>('hobbies'); // Инициализируем значением по умолчанию
+  const [mainScreen, setMainScreen] = React.useState<'hobbies' | null>(null);
 
+  const navigateTo = (screen: typeof currentScreen, from?: 'hobbies' | 'community') => {
+    if (from) {
+      setPrevScreen(from);
+    }
+    setCurrentScreen(screen);
+  };
+  
   if (!fontsLoaded) {
     return null;
   }
 
+  if (currentScreen === 'profile') {
+    return <ProfileScreen navigation={{ 
+      goBack: () => setCurrentScreen(prevScreen),
+      cameFrom: prevScreen
+    }} />;
+  }
+
+  if (currentScreen === 'settings') {
+    return <SettingScreen navigation={{ 
+      goBack: () => setCurrentScreen('drawing'),
+      navigate: (screen: 'drawing' | 'hobbies') => setCurrentScreen(screen)
+    }} />;
+  }
+
   if (currentScreen === 'drawing') {
-    return <DrawingScreen navigation={{ goBack: () => setCurrentScreen('hobbies') }} />;
+    return <DrawingScreen navigation={{ 
+      goBack: () => setCurrentScreen('hobbies'),
+      navigateToSettings: () => setCurrentScreen('settings')
+    }} />;
   }
 
   if (currentScreen === 'registration') {
     return <RegistrationScreen navigation={{ 
       goBack: () => setCurrentScreen('login'),
-      navigateToSuccess: () => setCurrentScreen('registrationSuccess') // Добавляем метод
+      navigateToSuccess: () => setCurrentScreen('registrationSuccess')
     }} />;
   }
 
@@ -86,8 +148,19 @@ export default function App() {
 
   if (currentScreen === 'hobbies') {
     return <HobbiesScreen navigation={{ 
-      goBack: () => setCurrentScreen('login'),
-      navigateToDrawing: () => setCurrentScreen('drawing')
+      goBack: () => setCurrentScreen(mainScreen || 'login'), 
+      navigateToDrawing: () => navigateTo('drawing', 'hobbies'),
+      navigateToCommunity: () => navigateTo('community', 'hobbies'),
+      navigateToProfile: () => navigateTo('profile', 'hobbies'),
+      currentScreen: 'hobbies'
+    }} />;
+  }
+  
+  if (currentScreen === 'community') {
+    return <CommunityScreen navigation={{ 
+      goBack: () => setCurrentScreen('hobbies'),
+      navigateToProfile: () => navigateTo('profile', 'community'),
+      currentScreen: 'community'
     }} />;
   }
 
@@ -124,7 +197,10 @@ export default function App() {
           <View style={styles.buttonstyle}>  
             <TouchableOpacity 
               style={styles.button} 
-              onPress={() => setCurrentScreen('hobbies')}
+              onPress={() => {
+                setCurrentScreen('hobbies');
+                setMainScreen('hobbies');
+              }}
             >
               <Text style={styles.buttonText}>Войти</Text>
             </TouchableOpacity>
@@ -278,12 +354,23 @@ function RegistrationSuccessScreen({ navigation }: RegistrationSuccessScreenProp
     </ImageBackground>
   );
 }
+
 function HobbiesScreen({ navigation }: HobbiesScreenProps) {
+  const [showNewHobbyModal, setShowNewHobbyModal] = useState(false);
+  const [hobbyName, setHobbyName] = useState('');
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+
+  React.useEffect(() => {
+    if (navigation.setAsMain) {
+      navigation.setAsMain();
+    }
+  }, []);
+
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
-      <View style={styles.container}>
+      <View style={[styles.container, showNewHobbyModal && { opacity: 0.6 }]}>
         <View style={styles.UpperPanel}>
-          <UpperPanel />
+          <BackGroundGradientOrange />
         </View>
 
         <View style={styles.LogoOnMainScreen}>
@@ -298,26 +385,37 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
           <LowerPanel />
         </View>
 
-        <View style={styles.MainScreenLogo}>
+        <TouchableOpacity 
+          style={styles.MainScreenLogo}
+          onPress={() => navigation.navigateToProfile()}
+        >
           <MainScreenLogo />
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.BackToMainButtonWrapper}>
           <TouchableOpacity 
             style={styles.BackToMainButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => {}}
           >
-            <BackToMainIcon />
+            <ActiveBackToMainIcon />
           </TouchableOpacity>
-          <Text style={styles.BackToMainButtonText}>Назад</Text>
+          <Text style={[
+            styles.BackToMainButtonText,
+            navigation.currentScreen === 'hobbies' && styles.activeOpacityText
+          ]}>Главная</Text>
         </View>
 
         <View style={styles.CommunityButtonWrapper}>
           <TouchableOpacity 
-            style={styles.CommunityButton}>
-            <CommunityIcon />
+            style={styles.CommunityButton}
+            onPress={() => navigation.navigateToCommunity()}
+          >
+            {navigation.currentScreen === 'community' ? <ActiveCommunityIcon /> : <CommunityIcon />}
           </TouchableOpacity>
-          <Text style={styles.communityButtonText}>Сообщество</Text>
+          <Text style={[
+            styles.communityButtonText,
+            navigation.currentScreen === 'community' && styles.activeOpacityText
+          ]}>Сообщество</Text>
         </View>
 
         <TouchableOpacity 
@@ -389,13 +487,245 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
               </View>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.hobbyItem}>
+            <View style={styles.hobbyItem}>
               <StarIcon />
               <View style={styles.hobbyTextWrapper}>
                 <Text style={styles.hobbyText}>Попробуйте что-то новое</Text>
                 <Text style={styles.hobbyStatus}>А вдруг это твоё?</Text>
               </View>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+
+      {showNewHobbyModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.newHobbyModal}>
+            {/* Крестик закрытия */}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowNewHobbyModal(false)}
+            >
+              <CloseCreatingHobbyIcon />
             </TouchableOpacity>
+
+            {/* Заголовок */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Добавить новое</Text>
+              <Text style={styles.modalTitle}>хобби</Text>
+            </View>
+
+            {/* Блок с иконкой и полем ввода */}
+            <View style={styles.inputContainer}>
+
+              <View style={styles.addPictureIcon}>
+                <AddPictureOnCreatingHobby />
+              </View>
+
+              <View style={styles.textInputWrapper}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Название хобби"
+                  placeholderTextColor="#999"
+                  value={hobbyName}
+                  onChangeText={setHobbyName}
+                />
+                <View style={styles.underline} />
+              </View>
+            </View>
+
+            {/* Блок с напоминаниями */}
+            <View style={styles.remindersContainer}>
+              <Text style={styles.remindersText}>Напоминания</Text>
+              <TouchableOpacity 
+                onPress={() => setRemindersEnabled(!remindersEnabled)}
+                style={styles.switchContainer}
+              >
+                {remindersEnabled ? <SwitchOnIcon /> : <SwitchOffIcon />}
+              </TouchableOpacity>
+            </View>
+
+            {/* Кнопка подтверждения */}
+            <TouchableOpacity style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>Добавить</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      <TouchableOpacity 
+        style={styles.CreateNewHobby}
+        onPress={() => setShowNewHobbyModal(true)}
+      >
+        <NewHobbyIcon />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function ProfileScreen({ navigation }: ProfileScreenProps) {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [notifications, setNotifications] = useState({
+    hobbyReminder: true,
+    postLikes: true,
+    postComments: true
+  });
+
+  return (
+    <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
+      <View style={styles.profileContainer}>
+        {/* Фон */}
+        <View style={styles.UpperPanel}>
+          <BackGroundGradientOrange/>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.ThreeStripedButton}
+          onPress={navigation.goBack}
+        >
+          <ArrowToBack />
+        </TouchableOpacity>
+
+        <View style={styles.PaintScreenText}>
+          <Text style={styles.PaintScreenTextFonts}>профиль</Text>
+        </View>
+
+        {/* Аватар */}
+        <View style={styles.avatarContainerOnProfile}>
+          <View style={styles.profileAvatar}>
+            <MainScreenLogo />
+          </View>
+          <TouchableOpacity style={styles.cameraIcon}>
+            <ProfileCameraForChangePictureIcon />
+          </TouchableOpacity>
+        </View>
+
+        {/* Никнейм */}
+        <View style={styles.nicknameContainer}>
+          <Text style={styles.nickname}>nickname</Text>
+          <TouchableOpacity>
+            <ChangeNickNameIcon />
+          </TouchableOpacity>
+        </View>
+
+        {/* Данные аккаунта */}
+      <View style={styles.accountDataContainer}>
+        {/* Рамка для email */}
+        <View style={styles.dataItemContainer}>
+          <Text style={styles.dataLabel}>Эл. почта</Text>
+          <Text style={styles.dataValue}>email@example.com</Text>
+        </View>
+        
+        {/* Рамка для пароля */}
+        <View style={styles.dataItemContainer}>
+          <Text style={styles.dataLabel}>Пароль</Text>
+          <Text style={styles.dataValue}>
+            {passwordVisible ? 'password123' : '••••••••'}
+          </Text>
+          <TouchableOpacity 
+            onPress={() => setPasswordVisible(!passwordVisible)}
+            style={styles.eyeIcon}
+          >
+            {passwordVisible ? <EyeOpenedIcon /> : <EyeClosedIcon />}
+          </TouchableOpacity>
+        </View>
+      </View>
+        
+        {/* Уведомления */}
+        <Text style={styles.sectionTitleOnProfile}>Уведомления</Text>
+        
+        <View style={styles.notificationsContainer}>
+          <View style={styles.notificationItemContainer}>
+            <Text style={styles.notificationText}>Напоминание о хобби</Text>
+            <View style={styles.switchContainer}>
+              <TouchableOpacity onPress={() => setNotifications({
+                ...notifications,
+                hobbyReminder: !notifications.hobbyReminder
+              })}>
+                {notifications.hobbyReminder ? <SwitchOnIcon /> : <SwitchOffIcon />}
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <View style={styles.notificationItemContainer}>
+            <Text style={styles.notificationText}>Лайки моих постов</Text>
+            <View style={styles.switchContainer}>
+              <TouchableOpacity onPress={() => setNotifications({
+                ...notifications,
+                postLikes: !notifications.postLikes
+              })}>
+                {notifications.postLikes ? <SwitchOnIcon /> : <SwitchOffIcon />}
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <View style={styles.notificationItemContainer}>
+            <Text style={styles.notificationText}>Комментарии к моим постам</Text>
+            <View style={styles.switchContainer}>
+              <TouchableOpacity onPress={() => setNotifications({
+                ...notifications,
+                postComments: !notifications.postComments
+              })}>
+                {notifications.postComments ? <SwitchOnIcon /> : <SwitchOffIcon />}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function CommunityScreen({ navigation }: CommunityScreenProps) {
+  return (
+    <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
+      <View style={styles.container}>
+        <View style={styles.UpperPanel}>
+          <BackGroundGradientOrange />
+        </View>
+
+        <View style={styles.LowerPanel}>
+          <LowerPanel />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.MainScreenLogo}
+          onPress={() => navigation.navigateToProfile()}
+        >
+          <MainScreenLogo />
+        </TouchableOpacity>
+
+        <View style={styles.BackToMainButtonWrapper}>
+          <TouchableOpacity 
+            style={styles.BackToMainButton}
+            onPress={() => navigation.goBack()}
+          >
+            {navigation.currentScreen === 'hobbies' ? <ActiveBackToMainIcon /> : <BackToMainIcon />}
+          </TouchableOpacity>
+          <Text style={[
+            styles.BackToMainButtonText,
+            navigation.currentScreen === 'hobbies' && styles.activeOpacityText
+          ]}>Главная</Text>
+        </View>
+
+        <View style={styles.CommunityButtonWrapper}>
+          <TouchableOpacity 
+            style={styles.CommunityButton}
+            onPress={() => {}}
+          >
+            <ActiveCommunityIcon />
+          </TouchableOpacity>
+          <Text style={[
+            styles.communityButtonText,
+            navigation.currentScreen === 'community' && styles.activeOpacityText
+          ]}>Сообщество</Text>
+        </View>
+
+        <Text style={[styles.title, styles.leftAligned]}>Сообщество</Text>
+
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.content}>
+            <Text style={styles.communityText}>Здесь будет контент сообщества</Text>
           </View>
         </ScrollView>
       </View>
@@ -419,7 +749,7 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
 
         <View style={styles.whiteRectangleContainer}>
           <WhiteRectangle />
-          
+        
           <View style={styles.tabsContainer}>
             <View style={styles.buttonsRow}>
               <TouchableOpacity 
@@ -447,7 +777,7 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
               
               <TouchableOpacity 
                 style={styles.tabButton}
-                onPress={() => setActiveTab('settings')}
+                onPress={() => navigation.navigateToSettings()}
               >
                 <Text style={[
                   styles.tabButtonText,
@@ -490,537 +820,181 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  tabsContainer: {
-    position: 'absolute',
-    top: '110%',
-    width: '100%',
-  },
-  
-  buttonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  
-  fullUnderline: {
-    height: 2,
-    backgroundColor: '#CCCCCC',
-    marginTop: 5,
-  },
-  
-  activeUnderline: {
-    position: 'absolute',
-    height: '100%',
-    backgroundColor: '#62281B',
-  },
-  
-  gapLineContainer: {
-    width: 64,
-    flexDirection: 'row',
-  },
-  
-  gapLineLeft: {
-    width: '50%',
-    height: '100%',
-    backgroundColor: '#CCCCCC',
-  },
-  
-  gapLineRight: {
-    width: '50%',
-    height: '100%',
-    backgroundColor: '#CCCCCC',
-  },
-  
-  activeGapLine: {
-    backgroundColor: '#62281B',
-  },
-  
-  tabButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginLeft: -30, // добавлено
-  },
-  
-  tabButtonText: {
-    fontSize: 18,
-    color: '#999999',
-    fontFamily: 'IgraSans',
-  },
-  
-  activeTabText: {
-    color: '#62281B',
-  },
+function SettingScreen({ navigation }: SettingScreenProps) {
+  const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('settings');
+  const [isSwitchOn, setIsSwitchOn] = useState(true);
 
-  PaintButtonText: {
-    fontSize: 18,
-  },
+  const firstDayOfMonth = new Date(2025, 3, 1);
+  let startOffset = firstDayOfMonth.getDay();
+  startOffset = (startOffset + 6) % 7;
 
-  trackingButton: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  
-  settingsButton: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
+  const daysInMonth = 30;
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const allDays = Array(startOffset).fill(null).concat(days);
 
-  paintOpacityArtContainer: {
-    position: 'absolute',
-    top: '0%', // Позиционируем по вертикали
-    left: '10%', // Занимаем всю ширину
-    zIndex: 1, // Чтобы был поверх градиента
-  },
-  
-  whiteRectangleContainer: {
-    bottom: '15%',
-    zIndex: 1, // Чтобы был поверх градиента
-    left: '1%',
-  },
+  const weeks = [];
+  for (let i = 0; i < allDays.length; i += 7) {
+    const week = allDays.slice(i, i + 7);
+    while (week.length < 7) {
+      week.push(null);
+    }
+    weeks.push(week);
+  }
 
-  scrollViewContent: {
-    paddingBottom: height * 0.1,
-  },
-  container: {
-    flex: 1,
-    padding: 30,
-    justifyContent: 'center',
-  },
-  background: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  backgroundImage: {
-    transform: [{ scale: 1.08 }],
-    margin: -15,
-  },
-  content: {
-    alignItems: 'center',
-  },
-  registrationTitle: {
-    fontFamily: 'IgraSans',
-    fontSize: 36,
-    color: '#62281B',
-    alignSelf: 'center',
-    marginBottom: 62,
-    // textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+  const handleDayPress = (day: number) => {
+    console.log('Выбран день:', day);
+  };
 
-  },
-  registrationTitleOnAddPicture: {
-    fontFamily: 'IgraSans',
-    fontSize: 24,
-    color: '#62281B',
-    alignSelf: 'center',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
-    marginTop: 19,
-    marginBottom: 45,
+  return (
+    <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
+      <View style={styles.container}>
+        <View style={styles.UpperPanel}>
+          <BackGroundGradientOrange />
+        </View>
 
-  },
-  label: {
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    color: '#62281B',
-    alignSelf: 'flex-start',
-    marginLeft: 10,
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    marginBottom: 12,
-  },
-  lastInputWrapper: {
-    marginBottom: 30,
-  },
-  input: {
-    width: 334,
-    height: 55,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#FF6F3B',
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-  },
-  passwordInputContainer: {
-    width: 334,
-    height: 55,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#FF6F3B',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 15,
-  },
-  passwordInput: {
-    flex: 1,
-    height: '100%',
-    paddingHorizontal: 15,
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-  },
-  eyeIcon: {
-    padding: 10,
-  },
-  
-  mainButton: {
-    width: 334,
-    height: 55,
-    borderRadius: 20,
-    backgroundColor: '#FF6F3B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 100,
-  },
+        <View style={styles.paintOpacityArtContainer}>
+          <PaintOpacityArt />
+        </View>
 
-  mainButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'IgraSans',
-    fontSize: 22,
-    textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  secondaryButton: {
-    width: 334,
-    height: 55,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FF6F3B',
-    marginTop: 15,
-  },
+        <View style={styles.whiteRectangleContainer}>
+          <WhiteRectangle />
 
-  avatarContainer: {
-    width: 120,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 68,
-  },
+          <View style={styles.tabsContainer}>
+            <View style={styles.buttonsRow}>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => { 
+                  setActiveTab('tracking');
+                  navigation.navigate('drawing');
+                }}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  activeTab === 'tracking' && styles.activeTabText
+                ]}>
+                  отслеживание
+                </Text>
+              </TouchableOpacity>
 
-  secondaryButtonText: {
-    color: '#FF6F3B',
-    fontFamily: 'IgraSans',
-    fontSize: 20,
-    textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  
-  form: {
-    alignSelf: 'stretch',
-    gap: 16,
-  },
-  passwordContainer: {
-    marginBottom: 8,
-  },
-  inputText: {
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    color: '#000',
-  },
-  restoreText: {
-    color: '#FF6F3B',
-    textAlign: 'right',
-    marginTop: 4,
-    fontSize: 14,
-    fontFamily: 'IgraSans',
-  },
-  logo: {
-    width: 170,
-    height: 170,
-    transform: [{ scale: 1.5 }],
-    marginTop: 90,
-    marginBottom: 70,
-  },
-  
-  button: {
-    alignItems: 'center',
-    borderWidth: 0.15,
-    borderColor: '#000',
-    borderRadius: 30,
-    width: 210,
-    height: 60,
-    justifyContent: 'center',
-    backgroundColor: '#FF6F3B',
-  },
-  button2: {
-    alignItems: 'center',
-    borderWidth: 0.15,
-    borderColor: 'black',
-    borderRadius: 30,
-    width: 210,
-    height: 50,
-    justifyContent: 'center',
-    backgroundColor: 'white'
-  },
-  buttonText: {
-    color: "#fff",
-    fontFamily: 'IgraSans',
-    fontSize: 18,
-    textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-    transform: [{ scaleX: 1.15 }],
-  },
-  buttonText2: {
-    color: "#62281B",
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
-    transform: [{ scaleX: 1.05 }],
-  },
-  buttonstyle: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
-    marginTop: 55,
-  },
-  
-  nicknameLabel: {
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    color: '#000',
-    alignSelf: 'flex-start',
-    marginLeft: 10,
-    marginBottom: -10,
-  },
+              <View style={styles.gapLineContainer}>
+                <View style={[
+                  styles.gapLineLeft,
+                  activeTab === 'tracking' && styles.activeGapLine
+                ]} />
+                <View style={[
+                  styles.gapLineRight,
+                  activeTab === 'settings' && styles.activeGapLine
+                ]} />
+              </View>
 
-  registerButton: {
-    backgroundColor: '#FF6F3B',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => setActiveTab('settings')}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  activeTab === 'settings' && styles.activeTabText
+                ]}>
+                  настройки
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-  backButtonText: {
-    color: '#FF6F3B',
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-  },
-  registerButtonText: {
-    color: "#fff",
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
+            <View style={styles.fullUnderline}>
+              <View style={[
+                styles.activeUnderline,
+                activeTab === 'tracking' && { width: '52%', left: '-2%' },
+                activeTab === 'settings' && { width: '50%', left: '50%' }
+              ]} />
+            </View>
+          </View>
+        </View>
 
-  inputField: {
-    width: 334,
-    height: 55,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#CCCCCC',
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-  },
-  backButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 50,
-    zIndex: 1,
-  },
+        <View style={styles.settingsContent}>
+          {/* Календарь */}
+          <View style={styles.calendarContainer}>
 
-  CreateNewHobby: {
-    position: 'absolute',
-    bottom: 120,
-    right: 10,
-    zIndex: 1,
-  },
+            <View style={styles.monthHeader}>
+              <TouchableOpacity
+                // onPress={() => navigation.goBack()}
+              >
+                <PointerLeft />
+              </TouchableOpacity>
 
-  CreateNewArtHobby: {
-    position: 'absolute',
-    bottom: 50,
-    right: 10,
-    zIndex: 1,
-    transform: [{ scale: 0.8 }],
-  },
+              <Text style={styles.monthYearText}>апрель 2025 г.</Text>
 
-  BackToMainButtonWrapper: {
-    position: 'absolute',
-    bottom: 20,
-    right: 40,
-    alignItems: 'center',  // Центрируем как иконку, так и текст по горизонтали
-    zIndex: 1,
-  },
+              <TouchableOpacity
+                // onPress={() => navigation.goBack()}
+              >
+                <PointerRight />
+              </TouchableOpacity>
+            </View>
 
-  BackToMainButtonText: {
-    fontFamily: 'IgraSans',
-    fontSize: 11,  // Размер шрифта
-    color: '#62281B',  // Цвет текста
-    marginTop: 5,   // Отступ сверху для текста (расстояние между иконкой и текстом)
-  },
+            {/* Дни недели */}
+            <View style={styles.weekDaysRow}>
+              {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map((day) => (
+                <Text key={day} style={styles.weekDayText}>{day}</Text>
+              ))}
+            </View>
 
-  BackToMainButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+            {/* Дни месяца */}
+            {weeks.map((week, weekIndex) => (
+              <View key={weekIndex} style={styles.weekRow}>
+                {week.map((day, index) =>
+                  day ? (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.dayButton}
+                      onPress={() => handleDayPress(day)}
+                    >
+                      <Text style={styles.dayText}>{day}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View key={index} style={styles.dayButton} />
+                  )
+                )}
+              </View>
+            ))}
+          </View>
 
-  CommunityButtonWrapper: {
-    position: 'absolute',
-    bottom: 20,
-    left: 30,
-    alignItems: 'center',  // Центрируем как иконку, так и текст по горизонтали
-    zIndex: 1,
-  },
-  
-  CommunityButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  
-  communityButtonText: {
-    fontFamily: 'IgraSans',
-    fontSize: 11,  // Размер шрифта
-    color: '#62281B',  // Цвет текста
-    marginTop: 5,   // Отступ сверху для текста (расстояние между иконкой и текстом)
-    opacity: 0.4,
-  },
+          {/* Серая линия */}
+          <View style={styles.divider} />
 
-  ThreeStripedButton: {
-    position: 'absolute',
-    top: 70,
-    left: 31,
-    zIndex: 1,
-  },
-  BellButton: {
-    position: 'absolute',
-    top: 70,
-    right: 50,
-    zIndex: 1,
-  },
 
-  UpperPanel: {
-    position: 'absolute',
-    top: '0%',
-    width: '100%',
-    left: '2%',
-    transform: [{ scaleX: 1.06 }],
-  },  
+          {/* Напоминания + переключатель */}
+          <View style={styles.reminderHeader}>
+            <Text style={styles.sectionTitle}>Напоминания</Text>
+            <TouchableOpacity onPress={() => setIsSwitchOn(!isSwitchOn)}>
+              {isSwitchOn ? <SwitchOnIcon /> : <SwitchOffIcon />}
+            </TouchableOpacity>
+          </View>
 
-  MainScreenText: {
-    position: 'absolute',
-    top: 50,
-    left: '40%',
-  },
+          {/* Серая линия */}
+          <View style={styles.divider} />
 
-  PaintScreenText: {
-    position: 'absolute',
-    top: 51,
-    left: 100,
-  },
+          {/* Кнопки действий */}
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity style={styles.buttonOnSettings}>
+              <Text style={styles.buttonTextOnSettings}>Добавить прогресс</Text>
+            </TouchableOpacity>
 
-  PaintScreenTextFonts: {
-    fontSize: 40,
-    color: '#62281B',
-    fontFamily: 'IgraSans',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  }, 
+            <TouchableOpacity style={styles.buttonOnSettings}>
+              <Text style={styles.buttonTextOnSettings}>Изменить цель</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-  leftAligned: {
-    textAlign: 'left', 
-    width: '100%',
-    marginLeft: 30,
-  },
+        <TouchableOpacity
+          style={styles.ThreeStripedButton}
+          onPress={() => navigation.navigate('hobbies')}
+        >
+          <ArrowToBack />
+        </TouchableOpacity>
 
-  arrowRightIcon: {
-    width: 20,
-    height: 20,
-    marginLeft: 10,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-
-  MainScreenTextFonts: {
-    fontSize: 45,
-    letterSpacing: 10, 
-    color: '#FFFFFF',
-  },  
-
-  LogoOnMainScreen: {
-    position: 'absolute',
-    top: 40,
-    left: '45%',
-  },
-
-  LowerPanel: {
-    position: 'absolute',
-    bottom: '0%',
-    zIndex: 1,
-    width: '100%',
-    left: '2%',
-    transform: [{ scaleX: 1.06 }],
-  },
-
-  MainScreenLogo: {
-    position: 'absolute',
-    bottom: 20,
-    left: '50%',
-    zIndex: 1,
-  },
-  
-  title: {
-    fontSize: 36,
-    marginTop: '30%',
-    marginBottom: '5%',
-    textAlign: 'left',
-    color: '#62281B',
-    fontFamily: 'IgraSans',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-
-  hobbyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#FEE5CE',
-    borderRadius: 15,
-    padding: 15,
-    width: '100%',
-    height: height * 0.12,
-  },
-  
-  
-  hobbyTextWrapper: {
-    flexDirection: 'column',
-    marginLeft: 15,
-    flex: 1,
-  },
-  
-  hobbyText: {
-    fontFamily: 'IgraSans',
-    fontSize: 18,
-    color: '#62281B',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  
-  hobbyStatus: {
-    fontFamily: 'IgraSans',
-    fontSize: 16,
-    color: '#62281B',
-    marginTop: 5,
-  },
-});
+        <View style={styles.PaintScreenText}>
+          <Text style={styles.PaintScreenTextFonts}>рисование</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
