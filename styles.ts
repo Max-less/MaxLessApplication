@@ -455,11 +455,12 @@ export const styles = StyleSheet.create({
 
   scrollViewContent: {
     paddingBottom: height * 0.1,
+    width: 340,
   },
 
   container: {
     flex: 1,
-    padding: 30,
+    padding: 35,
     justifyContent: 'center',
   },
 
@@ -802,7 +803,7 @@ export const styles = StyleSheet.create({
   BellButton: {
     position: 'absolute',
     top: 70,
-    right: 50,
+    right: 30,
     zIndex: 1,
   },
 

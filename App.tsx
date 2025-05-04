@@ -438,7 +438,10 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
         
         <Text style={[styles.title, styles.leftAligned]}>Мои хобби</Text>
 
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}  // ← Скрывает вертикальную полосу прокрутки
+        >
           <View style={styles.content}>
             <TouchableOpacity style={styles.hobbyItem}>
               <GuitarIcon />
