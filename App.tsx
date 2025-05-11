@@ -1015,31 +1015,25 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
 function SettingScreen({ navigation }: SettingScreenProps) {
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('settings');
   const [isSwitchOn, setIsSwitchOn] = useState(true);
-  const [currentMonth, setCurrentMonth] = useState(3); // 3 = апрель (0-11)
+  const [currentMonth, setCurrentMonth] = useState(4);
   const [currentYear, setCurrentYear] = useState(2025);
   const [selectedDates, setSelectedDates] = useState<{[key: string]: number[]}>({});
 
-  // Получаем данные календаря (исправленная версия)
   const getCalendarData = (month: number, year: number) => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
-    // Получаем день недели первого дня месяца (0-6, где 0 - воскресенье)
+
     const firstDayOfWeek = firstDay.getDay();
-    // Преобразуем к формату 0-6, где 0 - понедельник
     const startOffset = (firstDayOfWeek + 6) % 7;
     
     const daysInMonth = lastDay.getDate();
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     
-    // Добавляем null для пустых ячеек в начале месяца
     const allDays = Array(startOffset).fill(null).concat(days);
-    
-    // Разбиваем на недели по 7 дней
+
     const weeks = [];
     for (let i = 0; i < allDays.length; i += 7) {
       let week = allDays.slice(i, i + 7);
-      // Дополняем последнюю неделю null до 7 дней, если нужно
       while (week.length < 7) {
         week.push(null);
       }
@@ -1080,7 +1074,6 @@ function SettingScreen({ navigation }: SettingScreenProps) {
         ? currentMonthDates.filter(d => d !== day)
         : [...currentMonthDates, day];
       
-      // Вывод в консоль всех выбранных дат
       const allSelected = Object.entries(prev)
         .filter(([key]) => key !== monthKey)
         .reduce((acc, [key, days]) => {
@@ -1169,28 +1162,40 @@ function SettingScreen({ navigation }: SettingScreenProps) {
 
         <View style={styles.settingsContent}>
           <View style={styles.calendarContainer}>
-            {/* ... код заголовка и дней недели ... */}
-            
-            {weeks.map((week, weekIndex) => (
-              <View key={weekIndex} style={styles.weekRow}>
-                {week.map((day, dayIndex) => {
-                  if (day === null) {
-                    // Пустая ячейка для выравнивания
-                    return <View key={dayIndex} style={styles.emptyDay} />;
-                  }
-                  return (
-                    <TouchableOpacity
-                      key={dayIndex}
-                      style={[
-                        styles.dayButton,
-                        isDaySelected(day) && styles.selectedDay
-                      ]}
-                      onPress={() => handleDayPress(day)}
-                    >
-                      <Text style={styles.dayText}>{day}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+            <View style={styles.monthHeader}>
+              <TouchableOpacity style={styles.monthNavButton} onPress={handlePrevMonth}>
+                <PointerLeft />
+              </TouchableOpacity>
+              
+              <Text style={styles.monthYearText}>
+                {monthNames[currentMonth]} {currentYear} г.
+              </Text>
+              
+              <TouchableOpacity style={styles.monthNavButton} onPress={handleNextMonth}>
+                <PointerRight />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.weekDaysRow}>
+              {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map(day => (
+                <Text key={day} style={styles.weekDayText}>{day}</Text>
+              ))}
+            </View>
+
+            {weeks.map((week, i) => (
+              <View key={i} style={styles.weekRow}>
+                {week.map((day, j) => day ? (
+                  <TouchableOpacity
+                    key={j}
+                    style={[
+                      styles.dayButton,
+                      isDaySelected(day) && styles.selectedDay
+                    ]}
+                    onPress={() => handleDayPress(day)}
+                  >
+                    <Text style={styles.dayText}>{day}</Text>
+                  </TouchableOpacity>
+                ) : <View key={j} style={styles.dayButton} />)}
               </View>
             ))}
           </View>
