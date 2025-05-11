@@ -8,6 +8,7 @@ export const useFonts = () => {
     const loadFonts = async () => {
       await Font.loadAsync({
         'IgraSans': require('./assets/fonts/IgraSans.otf'),
+        'IdealistSans': require('./assets/fonts/IdealistSans.ttf'),
       });
       setFontsLoaded(true);
     };

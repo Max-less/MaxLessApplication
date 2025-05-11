@@ -35,6 +35,10 @@ import CloseCreatingHobbyIcon from "./assets/icons/CloseCreatingHobbyIcon";
 import AddPictureOnCreatingHobby from './assets/icons/AddPictureOnCreatingHobby';
 import ProfileCameraForChangePictureIcon from './assets/icons/ProfileCameraForChangePictureIcon';
 import ChangeNickNameIcon from './assets/icons/ChangeNickNameIcon';
+import NewMediaNoteIcon from './assets/icons/NewMediaNoteIcon';
+import NewTextNoteIcon from './assets/icons/NewTextNoteIcon';
+import SearchIcon from './assets/icons/SearchIcon';
+import CreateNewSocietyIcon from './assets/icons/CreateNewSocietyIcon';
 
 type ProfileScreenProps = {
   navigation: {
@@ -190,7 +194,15 @@ export default function App() {
                 placeholder="Пароль"
                 placeholderTextColor="#999"
               />
-              <Text style={styles.restoreText}>Забыли пароль?</Text>
+              
+              <TouchableOpacity 
+                onPress={() => {
+
+                }}
+              >
+                <Text style={styles.restoreText}>Забыли пароль?</Text>
+              </TouchableOpacity>
+
             </View>
           </View>
           
@@ -357,6 +369,7 @@ function RegistrationSuccessScreen({ navigation }: RegistrationSuccessScreenProp
 
 function HobbiesScreen({ navigation }: HobbiesScreenProps) {
   const [showNewHobbyModal, setShowNewHobbyModal] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [hobbyName, setHobbyName] = useState('');
   const [remindersEnabled, setRemindersEnabled] = useState(true);
 
@@ -366,9 +379,14 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
     }
   }, []);
 
+  const closeAllModals = () => {
+    setShowNewHobbyModal(false);
+    setShowNotificationsModal(false);
+  };
+
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
-      <View style={[styles.container, showNewHobbyModal && { opacity: 0.6 }]}>
+      <View style={[styles.container, (showNewHobbyModal || showNotificationsModal) && { opacity: 0.6 }]}>
         <View style={styles.UpperPanel}>
           <BackGroundGradientOrange />
         </View>
@@ -431,16 +449,36 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={styles.BellButton}
+          style={[
+            styles.BellButton,
+            showNewHobbyModal && { opacity: 0.6 }
+          ]}
+          onPress={() => setShowNotificationsModal(true)}
+          disabled={showNewHobbyModal}
         >
-          <BellIcon />
+          <View style={showNewHobbyModal && { opacity: 0.6 }}>
+            <BellIcon />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[
+            styles.CreateNewHobby,
+            showNotificationsModal && { opacity: 0.6 }
+          ]}
+          onPress={() => setShowNewHobbyModal(true)}
+          disabled={showNotificationsModal}
+        >
+          <View style={showNotificationsModal && { opacity: 0.6 }}>
+            <NewHobbyIcon />
+          </View>
         </TouchableOpacity>
         
         <Text style={[styles.title, styles.leftAligned]}>Мои хобби</Text>
 
         <ScrollView 
           contentContainerStyle={styles.scrollViewContent}
-          showsVerticalScrollIndicator={false}  // ← Скрывает вертикальную полосу прокрутки
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.content}>
             <TouchableOpacity style={styles.hobbyItem}>
@@ -514,8 +552,7 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
 
             {/* Заголовок */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Добавить новое</Text>
-              <Text style={styles.modalTitle}>хобби</Text>
+              <Text style={styles.modalTitle}>Новое хобби</Text>
             </View>
 
             {/* Блок с иконкой и полем ввода */}
@@ -549,19 +586,39 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
             </View>
 
             {/* Кнопка подтверждения */}
-            <TouchableOpacity style={styles.confirmButton}>
+            <TouchableOpacity 
+              style={styles.confirmButton}
+              onPress={() => {
+                // Логика сохранения заметки
+                setShowNewHobbyModal(false);
+              }}
+            >
               <Text style={styles.confirmButtonText}>Добавить</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       )}
 
-      <TouchableOpacity 
-        style={styles.CreateNewHobby}
-        onPress={() => setShowNewHobbyModal(true)}
-      >
-        <NewHobbyIcon />
-      </TouchableOpacity>
+      {showNotificationsModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.notificationsModal}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowNotificationsModal(false)}
+            >
+              <CloseCreatingHobbyIcon />
+            </TouchableOpacity>
+
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Уведомления</Text>
+            </View>
+
+
+          </View>
+        </View>
+      )}
+
     </View>
   );
 }
@@ -680,13 +737,101 @@ function ProfileScreen({ navigation }: ProfileScreenProps) {
 }
 
 function CommunityScreen({ navigation }: CommunityScreenProps) {
+  const [activeTab, setActiveTab] = useState<'feed' | 'subscriptions'>('feed');
+  const [feedSearch, setFeedSearch] = useState('');
+  const [subscriptionsSearch, setSubscriptionsSearch] = useState('');
+
+  const handleTabChange = (tab: 'feed' | 'subscriptions') => {
+    setActiveTab(tab);
+  };
+
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
-      <View style={styles.container}>
-        <View style={styles.UpperPanel}>
-          <BackGroundGradientOrange />
-        </View>
+      <View style={styles.UpperPanel}>
+        <BackGroundGradientOrange />
+      </View>
+      
+      {/* Кнопки переключения между вкладками */}
+      <View style={styles.communityTabsContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.communityTabButton, 
+            activeTab === 'feed' && styles.communityActiveTabBackground
+          ]}
+          onPress={() => handleTabChange('feed')}
+        >
+          <Text style={[
+            styles.communityTabText, 
+            activeTab === 'feed' && styles.communityActiveTabText
+          ]}>
+            Общая лента
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[
+            styles.communityTabButton, 
+            activeTab === 'subscriptions' && styles.communityActiveTabBackground
+          ]}
+          onPress={() => handleTabChange('subscriptions')}
+        >
+          <Text style={[
+            styles.communityTabText, 
+            activeTab === 'subscriptions' && styles.communityActiveTabText
+          ]}>
+            Подписки
+          </Text>
+        </TouchableOpacity>
+      </View>
 
+      {/* Поле поиска */}
+      <View style={styles.communitySearchContainer}>
+        <View style={styles.communitySearchBackground}>
+          <View style={styles.communitySearchIcon}>
+            <SearchIcon />
+          </View>
+          <TextInput
+            style={styles.communitySearchInput}
+            placeholder="Поиск"
+            placeholderTextColor="#62281B"
+            value={activeTab === 'feed' ? feedSearch : subscriptionsSearch}
+            onChangeText={(text) => {
+              if (activeTab === 'feed') {
+                setFeedSearch(text);
+              } else {
+                setSubscriptionsSearch(text);
+              }
+            }}
+            numberOfLines={1}
+          />
+        </View>
+      </View>
+
+      {activeTab === 'feed' && (
+        <View style={styles.feedContent}>
+          <Text style={styles.communitiesTitle}>Мои сообщества</Text>
+          
+          {/* Прямоугольник с кнопкой создания */}
+          <View style={styles.communityCreateCard}>
+            <TouchableOpacity style={styles.createSocietyButton}>
+              <View style={styles.createSocietyContainer}>
+                <CreateNewSocietyIcon />
+                <Text style={styles.createSocietyText}>Создать</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Контент для вкладки "Подписки" */}
+      {activeTab === 'subscriptions' && (
+        <View style={styles.subscriptionsContent}>
+          <Text style={styles.subscriptionsTitle}>Подписки</Text>
+          {/* Здесь можно добавить другой контент для подписок */}
+        </View>
+      )}
+
+      <View style={styles.container}>
         <View style={styles.LowerPanel}>
           <LowerPanel />
         </View>
@@ -724,13 +869,6 @@ function CommunityScreen({ navigation }: CommunityScreenProps) {
           ]}>Сообщество</Text>
         </View>
 
-        <Text style={[styles.title, styles.leftAligned]}>Сообщество</Text>
-
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <View style={styles.content}>
-            <Text style={styles.communityText}>Здесь будет контент сообщества</Text>
-          </View>
-        </ScrollView>
       </View>
     </View>
   );
@@ -738,10 +876,13 @@ function CommunityScreen({ navigation }: CommunityScreenProps) {
 
 function DrawingScreen({ navigation }: DrawingScreenProps) {
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('tracking');
+  const [showNewNoteModal, setShowNewNoteModal] = useState(false);
 
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
-      <View style={styles.container}>
+      {/* Основной контент с возможным затемнением */}
+      <View style={[styles.container, showNewNoteModal && { opacity: 0.6 }]}>
+
         <View style={styles.UpperPanel}>
           <BackGroundGradientOrange />
         </View>
@@ -814,11 +955,59 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
 
         <TouchableOpacity 
           style={styles.CreateNewArtHobby}
+          onPress={() => setShowNewNoteModal(true)}
         >
           <NewHobbyIcon />
         </TouchableOpacity>
 
       </View>
+      
+      {/* Модальное окно новой заметки */}
+      {showNewNoteModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.newHobbyModal}>
+            {/* Крестик закрытия */}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowNewNoteModal(false)}
+            >
+              <CloseCreatingHobbyIcon />
+            </TouchableOpacity>
+
+            {/* Заголовок */}
+            <View style={[styles.modalHeader, {marginBottom: -10}]}>
+              <Text style={styles.modalTitle}>Новая заметка</Text>
+            </View>
+
+            {/* Блок с иконками */}
+            <View style={[styles.iconsRow, {marginBottom: -10}]}>
+              <TouchableOpacity 
+                style={styles.iconContainer}
+                onPress={() => {
+                  // Логика сохранения заметки
+                  setShowNewNoteModal(false);
+                }}
+              >
+                <NewMediaNoteIcon />
+                <Text style={styles.iconText}>Медиа</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.iconContainer}
+                onPress={() => {
+                  // Логика сохранения заметки
+                  setShowNewNoteModal(false);
+                }}
+              >
+                <NewTextNoteIcon />
+                <Text style={styles.iconText}>Текст</Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </View>
+      )}
+
     </View>
   );
 }
@@ -963,7 +1152,6 @@ function SettingScreen({ navigation }: SettingScreenProps) {
           {/* Серая линия */}
           <View style={styles.divider} />
 
-
           {/* Напоминания + переключатель */}
           <View style={styles.reminderHeader}>
             <Text style={styles.sectionTitle}>Напоминания</Text>
@@ -978,11 +1166,13 @@ function SettingScreen({ navigation }: SettingScreenProps) {
           {/* Кнопки действий */}
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity style={styles.buttonOnSettings}>
-              <Text style={styles.buttonTextOnSettings}>Добавить прогресс</Text>
+              <Text style={styles.buttonTextOnSettings}>Добавить</Text>
+              <Text style={styles.buttonTextOnSettings}>прогресс</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.buttonOnSettings}>
-              <Text style={styles.buttonTextOnSettings}>Изменить цель</Text>
+              <Text style={styles.buttonTextOnSettings}>Изменить</Text>
+              <Text style={styles.buttonTextOnSettings}>цель</Text>
             </TouchableOpacity>
           </View>
         </View>

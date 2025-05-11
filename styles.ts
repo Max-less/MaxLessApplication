@@ -3,39 +3,266 @@ import { Dimensions, StyleSheet } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+
+  createSocietyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: -15,
+    top: 3,
+  },
   
+  createSocietyText: {
+    fontFamily: 'IdealistSans',
+    fontSize: 12,
+    color: '#62281B',
+    marginTop: 5,
+  },
+
+  communitiesTitle: {
+    fontFamily: 'IgraSans',
+    fontWeight: '400',
+    fontSize: 20,
+    color: '#62281B',
+    marginTop: 20,
+    marginBottom: 5,
+    marginLeft: 10,
+  },
+
+  communityCreateCard: {
+    width: 370,
+    height: 100,
+    backgroundColor: '#FEE5CE',
+    borderRadius: 25,
+    marginLeft: 4,
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  createSocietyButton: {
+    marginLeft: 20,
+    padding: 10,
+  },
+
+  subscriptionsTitle: {
+    fontFamily: 'IgraSans',
+    fontWeight: '400',
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#62281B',
+    marginTop: 20,
+  },
+
+  feedContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+
+  subscriptionsContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+
+  tabContent: {
+    padding: 20,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+
+  tabContentText: {
+    fontSize: 24,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    fontWeight: 'bold',
+  },
+
+  communitySearchBackground: {
+    width: 370,
+    height: 45,
+    backgroundColor: '#FEE5CE',
+    opacity: 0.5,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 15,
+  },
+
+  communitySearchInput: {
+    flex: 1,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    fontSize: 16,
+    paddingLeft: 8,
+    paddingTop: 3,
+    paddingBottom: 0,
+    margin: 0,
+    includeFontPadding: false,
+    overflow: 'hidden',
+  },
+
+  communityTabText: {
+    fontSize: 18,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    textAlign: 'center',
+    width: '100%',
+    paddingHorizontal: 10,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    marginTop: 7,
+  },
+
+  communityActiveTabText: {
+    fontSize: 18,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    textAlign: 'center',
+    width: '100%',
+    paddingHorizontal: 10,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    opacity: 1,
+    marginTop: 7,
+  },
+
+  communityTabButton: {
+    width: 190,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    paddingVertical: 0,
+  },
+
+  communityActiveTabBackground: {
+    backgroundColor: '#FEE5CE',
+    width: 190,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+  },
+
+  communityTabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 40,
+    marginBottom: 15,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+
+  communityActiveTab: {
+    borderBottomWidth: 0,
+  },
+
+  communitySearchContainer: {
+    paddingLeft: 16,
+    paddingRight: 16,
+    marginBottom: -10,
+    alignSelf: 'flex-start',
+  },
+
+  communitiesSection: {
+    paddingLeft: 16,
+    marginTop: 10,
+    alignSelf: 'flex-start',
+  },
+
+  communitySearchPlaceholder: {
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    fontSize: 16,
+    textAlign: 'left',
+    marginLeft: 8,
+  },
+
+  communitySearchIcon: {
+    marginRight: 10,
+  },
+  
+  communityContentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    marginBottom: 80,
+  },
+  
+  communitySectionTitle: {
+    fontSize: 20,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+    marginBottom: 15,
+    fontWeight: 'bold',
+  },
+
+  notificationsModal: {
+    position: 'relative',
+    width: 300,
+    height: 300,
+    backgroundColor: '#FEE5CE',
+    borderRadius: 20,
+    padding: 20,
+    paddingTop: 26,
+    alignItems: 'center',
+    marginTop: -330,
+    marginLeft: 50,
+  },
+
+  iconsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginVertical: 20,
+  },
+  
+  iconContainer: {
+    alignItems: 'center',
+    padding: 15,
+  },
+  
+  iconText: {
+    marginTop: 8,
+    fontSize: 16,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
+  },
+
   accountDataContainer: {
     marginHorizontal: 20,
     marginBottom: 20,
-    marginLeft: 20,      // общий отступ слева
+    marginLeft: 20,
   },
+
   dataItemContainer: {
     backgroundColor: 'rgba(98, 40, 27, 0.05)',
     borderRadius: 10,
     padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15, // Отступ внутри рамки
+    paddingHorizontal: 15,
     marginBottom: 10,
     bottom: '190%',
     right: '7%',
     height: 55,
     width: 355,
   },
+
   dataLabel: {
     color: '#F57F40',
     fontWeight: 'bold',
     fontSize: 16,
     marginRight: 10,
-    minWidth: 100,        // Минимальная ширина для лейблов
+    minWidth: 100,
   },
+
   dataValue: {
     fontSize: 16,
     color: '#62281B',
     flex: 1, 
-    width: 100,           // фиксированная ширина лейбла
+    width: 100,
     marginRight: 15,
-    marginLeft: 15,       // Фиксированный отступ от лейбла
+    marginLeft: 15,
   },
 
   notificationsContainer: {
@@ -85,6 +312,7 @@ export const styles = StyleSheet.create({
     borderRadius: 60,
     transform: [{ scale: 2.1 }],
   },
+
   cameraIcon: {
     position: 'absolute',
     height: 200,
@@ -133,6 +361,7 @@ export const styles = StyleSheet.create({
     bottom: '30%',
     right: '10%',
   },
+
   notificationItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -157,26 +386,26 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FEE5CE',
     borderRadius: 20,
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 26,
     alignItems: 'center',
   },
   
   closeButton: {
     position: 'absolute',
-    top: 15,
-    right: 15,
+    top: 0,
+    right: 0,
     zIndex: 1,
   },
 
   modalHeader: {
-    marginBottom: 10,
+    marginBottom: 18,
     alignItems: 'center',
   },
 
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
     color: '#62281B',
+    fontFamily: 'IgraSans',
     textAlign: 'center',
   },
 
@@ -203,7 +432,7 @@ export const styles = StyleSheet.create({
 
   underline: {
     height: 1,
-    backgroundColor: '#CCCCCC',
+    backgroundColor: '#62281B',
     marginTop: 5,
   },
 
@@ -216,8 +445,9 @@ export const styles = StyleSheet.create({
   },
 
   remindersText: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#62281B',
+    fontFamily: 'IgraSans',
   },
 
   switchContainer: {
@@ -234,8 +464,11 @@ export const styles = StyleSheet.create({
 
   confirmButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontFamily: 'IgraSans',
+    textShadowColor: 'rgba(255, 255, 255, 0.75)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
   },
 
   reminderHeader: {
@@ -247,9 +480,9 @@ export const styles = StyleSheet.create({
 
   monthHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    gap: 10,
     marginBottom: 10,
   },
 
@@ -292,22 +525,34 @@ export const styles = StyleSheet.create({
   },
 
   monthYearText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Bold',
+    fontSize: 24,
+    fontFamily: 'IdealistSans',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
+    color: '#62281B',
+    textShadowColor: '#62281B',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+
   },
+
   weekDaysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 2,
   },
+
   weekDayText: {
     width: 32,
     textAlign: 'center',
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
+    textShadowColor: '#62281B',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+    color: '#62281B'
   },
+
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -315,9 +560,14 @@ export const styles = StyleSheet.create({
   },
 
   dayText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
+    // textShadowColor: '#62281B',
+    // textShadowOffset: { width: 0.5, height: 0.5 },
+    // textShadowRadius: 1,
+    color: '#62281B'
   },
+
   divider: {
     height: 1,
     backgroundColor: '#999',
@@ -325,6 +575,7 @@ export const styles = StyleSheet.create({
     marginLeft: 18,
     marginRight: 18,
   },
+
   sectionTitle: {
     fontFamily: 'IgraSans',
     fontSize: 20,
@@ -334,6 +585,7 @@ export const styles = StyleSheet.create({
     textAlign: 'left',
     color: '#62281B',
   },
+
   actionButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -347,7 +599,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'IgraSans',
     fontSize: 16,
     textShadowColor: 'rgba(255, 255, 255, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 1,
     transform: [{ scaleX: 1.15 }],
   },
