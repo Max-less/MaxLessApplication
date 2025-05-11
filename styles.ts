@@ -3,6 +3,82 @@ import { Dimensions, StyleSheet } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+  emptyDay: {
+    width: 36,
+    height: 36,
+  },
+  
+  selectedDay: {
+    backgroundColor: '#FF6F3B',
+    borderRadius: 16,
+  },
+
+  monthHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 40,
+  },
+
+  monthNavButton: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  monthYearText: {
+    fontSize: 24,
+    fontFamily: 'IdealistSans',
+    textAlign: 'center',
+    marginBottom: 6,
+    color: '#62281B',
+    flex: 1,
+    textShadowColor: '#62281B',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+
+  calendarContainer: {
+    padding: 15,
+    zIndex: 20,
+    marginBottom: -10,
+    width: '100%',
+  },
+
+  weekDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+    paddingHorizontal: 10,
+  },
+
+  weekDayText: {
+    width: 32,
+    textAlign: 'center',
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
+    textShadowColor: '#62281B',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+    color: '#62281B'
+  },
+
+  weekRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 1,
+    paddingHorizontal: 10,
+  },
+
+  dayButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 30,
+    marginVertical: 1,
+  },
 
   createSocietyContainer: {
     alignItems: 'center',
@@ -478,14 +554,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  monthHeader: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-
   whiteRectangleContainer: {
     position: 'absolute',
     zIndex: 1,
@@ -509,56 +577,6 @@ export const styles = StyleSheet.create({
     padding: 15,
   },
   
-  calendarContainer: {
-    padding: 15,
-    zIndex: 20,
-    marginBottom: -10,
-  },
-  
-  dayButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 30,
-    marginVertical: 1,
-  },
-
-  monthYearText: {
-    fontSize: 24,
-    fontFamily: 'IdealistSans',
-    textAlign: 'center',
-    marginBottom: 6,
-    color: '#62281B',
-    textShadowColor: '#62281B',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
-
-  },
-
-  weekDaysRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 2,
-  },
-
-  weekDayText: {
-    width: 32,
-    textAlign: 'center',
-    fontFamily: 'IdealistSans',
-    fontSize: 18,
-    textShadowColor: '#62281B',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
-    color: '#62281B'
-  },
-
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 1,
-  },
-
   dayText: {
     fontFamily: 'IdealistSans',
     fontSize: 18,

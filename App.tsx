@@ -1015,26 +1015,91 @@ function DrawingScreen({ navigation }: DrawingScreenProps) {
 function SettingScreen({ navigation }: SettingScreenProps) {
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('settings');
   const [isSwitchOn, setIsSwitchOn] = useState(true);
+  const [currentMonth, setCurrentMonth] = useState(3); // 3 = апрель (0-11)
+  const [currentYear, setCurrentYear] = useState(2025);
+  const [selectedDates, setSelectedDates] = useState<{[key: string]: number[]}>({});
 
-  const firstDayOfMonth = new Date(2025, 3, 1);
-  let startOffset = firstDayOfMonth.getDay();
-  startOffset = (startOffset + 6) % 7;
-
-  const daysInMonth = 30;
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const allDays = Array(startOffset).fill(null).concat(days);
-
-  const weeks = [];
-  for (let i = 0; i < allDays.length; i += 7) {
-    const week = allDays.slice(i, i + 7);
-    while (week.length < 7) {
-      week.push(null);
+  // Получаем данные календаря (исправленная версия)
+  const getCalendarData = (month: number, year: number) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Получаем день недели первого дня месяца (0-6, где 0 - воскресенье)
+    const firstDayOfWeek = firstDay.getDay();
+    // Преобразуем к формату 0-6, где 0 - понедельник
+    const startOffset = (firstDayOfWeek + 6) % 7;
+    
+    const daysInMonth = lastDay.getDate();
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    
+    // Добавляем null для пустых ячеек в начале месяца
+    const allDays = Array(startOffset).fill(null).concat(days);
+    
+    // Разбиваем на недели по 7 дней
+    const weeks = [];
+    for (let i = 0; i < allDays.length; i += 7) {
+      let week = allDays.slice(i, i + 7);
+      // Дополняем последнюю неделю null до 7 дней, если нужно
+      while (week.length < 7) {
+        week.push(null);
+      }
+      weeks.push(week);
     }
-    weeks.push(week);
-  }
+    
+    return weeks;
+  };
+
+  const weeks = getCalendarData(currentMonth, currentYear);
+
+  const monthNames = [
+    'январь', 'февраль', 'март', 'апрель', 
+    'май', 'июнь', 'июль', 'август',
+    'сентябрь', 'октябрь', 'ноябрь', 'декабрь'
+  ];
+
+  const handlePrevMonth = () => {
+    const newMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const newYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+  };
+
+  const handleNextMonth = () => {
+    const newMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const newYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+  };
 
   const handleDayPress = (day: number) => {
-    console.log('Выбран день:', day);
+    const monthKey = `${currentYear}-${currentMonth}`;
+    
+    setSelectedDates(prev => {
+      const currentMonthDates = prev[monthKey] || [];
+      const newDates = currentMonthDates.includes(day)
+        ? currentMonthDates.filter(d => d !== day)
+        : [...currentMonthDates, day];
+      
+      // Вывод в консоль всех выбранных дат
+      const allSelected = Object.entries(prev)
+        .filter(([key]) => key !== monthKey)
+        .reduce((acc, [key, days]) => {
+          const [y, m] = key.split('-');
+          return [...acc, ...days.map(d => `${d}.${parseInt(m)+1}.${y}`)];
+        }, newDates.map(d => `${d}.${currentMonth+1}.${currentYear}`));
+      
+      console.log('Выбранные даты:', allSelected.join(', '));
+      
+      return {
+        ...prev,
+        [monthKey]: newDates
+      };
+    });
+  };
+
+  const isDaySelected = (day: number) => {
+    const monthKey = `${currentYear}-${currentMonth}`;
+    return selectedDates[monthKey]?.includes(day) || false;
   };
 
   return (
@@ -1103,79 +1168,60 @@ function SettingScreen({ navigation }: SettingScreenProps) {
         </View>
 
         <View style={styles.settingsContent}>
-          {/* Календарь */}
           <View style={styles.calendarContainer}>
-
-            <View style={styles.monthHeader}>
-              <TouchableOpacity
-                // onPress={() => navigation.goBack()}
-              >
-                <PointerLeft />
-              </TouchableOpacity>
-
-              <Text style={styles.monthYearText}>апрель 2025 г.</Text>
-
-              <TouchableOpacity
-                // onPress={() => navigation.goBack()}
-              >
-                <PointerRight />
-              </TouchableOpacity>
-            </View>
-
-            {/* Дни недели */}
-            <View style={styles.weekDaysRow}>
-              {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map((day) => (
-                <Text key={day} style={styles.weekDayText}>{day}</Text>
-              ))}
-            </View>
-
-            {/* Дни месяца */}
+            {/* ... код заголовка и дней недели ... */}
+            
             {weeks.map((week, weekIndex) => (
               <View key={weekIndex} style={styles.weekRow}>
-                {week.map((day, index) =>
-                  day ? (
+                {week.map((day, dayIndex) => {
+                  if (day === null) {
+                    // Пустая ячейка для выравнивания
+                    return <View key={dayIndex} style={styles.emptyDay} />;
+                  }
+                  return (
                     <TouchableOpacity
-                      key={index}
-                      style={styles.dayButton}
+                      key={dayIndex}
+                      style={[
+                        styles.dayButton,
+                        isDaySelected(day) && styles.selectedDay
+                      ]}
                       onPress={() => handleDayPress(day)}
                     >
                       <Text style={styles.dayText}>{day}</Text>
                     </TouchableOpacity>
-                  ) : (
-                    <View key={index} style={styles.dayButton} />
-                  )
-                )}
+                  );
+                })}
               </View>
             ))}
           </View>
 
-          {/* Серая линия */}
-          <View style={styles.divider} />
+            {/* Серая линия */}
+            <View style={styles.divider} />
 
-          {/* Напоминания + переключатель */}
-          <View style={styles.reminderHeader}>
-            <Text style={styles.sectionTitle}>Напоминания</Text>
-            <TouchableOpacity onPress={() => setIsSwitchOn(!isSwitchOn)}>
-              {isSwitchOn ? <SwitchOnIcon /> : <SwitchOffIcon />}
-            </TouchableOpacity>
+            {/* Напоминания + переключатель */}
+            <View style={styles.reminderHeader}>
+              <Text style={styles.sectionTitle}>Напоминания</Text>
+              <TouchableOpacity onPress={() => setIsSwitchOn(!isSwitchOn)}>
+                {isSwitchOn ? <SwitchOnIcon /> : <SwitchOffIcon />}
+              </TouchableOpacity>
+            </View>
+
+            {/* Серая линия */}
+            <View style={styles.divider} />
+
+            {/* Кнопки действий */}
+            <View style={styles.actionButtonsRow}>
+              <TouchableOpacity style={styles.buttonOnSettings}>
+                <Text style={styles.buttonTextOnSettings}>Добавить</Text>
+                <Text style={styles.buttonTextOnSettings}>прогресс</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.buttonOnSettings}>
+                <Text style={styles.buttonTextOnSettings}>Изменить</Text>
+                <Text style={styles.buttonTextOnSettings}>цель</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          {/* Серая линия */}
-          <View style={styles.divider} />
-
-          {/* Кнопки действий */}
-          <View style={styles.actionButtonsRow}>
-            <TouchableOpacity style={styles.buttonOnSettings}>
-              <Text style={styles.buttonTextOnSettings}>Добавить</Text>
-              <Text style={styles.buttonTextOnSettings}>прогресс</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.buttonOnSettings}>
-              <Text style={styles.buttonTextOnSettings}>Изменить</Text>
-              <Text style={styles.buttonTextOnSettings}>цель</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         <TouchableOpacity
           style={styles.ThreeStripedButton}
