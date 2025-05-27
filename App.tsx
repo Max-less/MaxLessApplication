@@ -39,6 +39,26 @@ import NewMediaNoteIcon from './assets/icons/NewMediaNoteIcon';
 import NewTextNoteIcon from './assets/icons/NewTextNoteIcon';
 import SearchIcon from './assets/icons/SearchIcon';
 import CreateNewSocietyIcon from './assets/icons/CreateNewSocietyIcon';
+import OrangeCircleIcon from './assets/icons/OrangeCircleIcon';
+import LikePressedIcon from './assets/icons/LikePressedIcon';
+import LikeUnPressedIcon from './assets/icons/LikeUnPressedIcon';
+import ComentIcon from './assets/icons/ComentIcon';
+import CameraIcon from './assets/icons/CameraIcon';
+
+type CommunityDetailsScreenProps = {
+  navigation: {
+    goBack: () => void;
+  };
+};
+
+type CommunityScreenProps = {
+  navigation: {
+    goBack: () => void;
+    navigateToProfile: () => void;
+    navigateToCommunityDetails: () => void; // Убираем параметр activeTab
+    currentScreen: 'hobbies' | 'community';
+  };
+};
 
 type ProfileScreenProps = {
   navigation: {
@@ -55,14 +75,6 @@ type HobbiesScreenProps = {
     navigateToProfile: () => void;
     currentScreen: 'hobbies' | 'community';
     setAsMain?: () => void;
-  };
-};
-
-type CommunityScreenProps = {
-  navigation: {
-    goBack: () => void;
-    navigateToProfile: () => void;
-    currentScreen: 'hobbies' | 'community';
   };
 };
 
@@ -100,9 +112,24 @@ const { width, height } = Dimensions.get('window');
 
 export default function App() {
   const fontsLoaded = useFonts();
-  const [currentScreen, setCurrentScreen] = React.useState<'login' | 'registration' | 'hobbies' | 'registrationSuccess' | 'drawing' | 'community' | 'settings' | 'profile'>('login');
-  const [prevScreen, setPrevScreen] = React.useState<'hobbies' | 'community'>('hobbies'); // Инициализируем значением по умолчанию
+
+  const [currentScreen, setCurrentScreen] = React.useState<
+  'login' | 'registration' | 'hobbies' | 'registrationSuccess' | 
+  'drawing' | 'community' | 'settings' | 'profile' | 'communityDetails'
+>('login');
+
+  const [prevScreen, setPrevScreen] = React.useState<'hobbies' | 'community'>('hobbies');
+
   const [mainScreen, setMainScreen] = React.useState<'hobbies' | null>(null);
+
+  const navigateWithParams = (
+    screen: 'communityDetails',
+    params: { activeTab: 'feed' | 'subscriptions' },
+    from?: 'hobbies' | 'community'
+  ) => {
+    if (from) setPrevScreen(from);
+    setCurrentScreen(screen);
+  };
 
   const navigateTo = (screen: typeof currentScreen, from?: 'hobbies' | 'community') => {
     if (from) {
@@ -110,9 +137,12 @@ export default function App() {
     }
     setCurrentScreen(screen);
   };
-  
-  if (!fontsLoaded) {
-    return null;
+
+
+  if (currentScreen === 'communityDetails') {
+    return <CommunityDetailsScreen 
+      navigation={{ goBack: () => setCurrentScreen('community') }}
+    />;
   }
 
   if (currentScreen === 'profile') {
@@ -164,6 +194,7 @@ export default function App() {
     return <CommunityScreen navigation={{ 
       goBack: () => setCurrentScreen('hobbies'),
       navigateToProfile: () => navigateTo('profile', 'community'),
+      navigateToCommunityDetails: () => navigateTo('communityDetails', 'community'),
       currentScreen: 'community'
     }} />;
   }
@@ -367,11 +398,16 @@ function RegistrationSuccessScreen({ navigation }: RegistrationSuccessScreenProp
   );
 }
 
+interface Hobby {
+  name: string;
+}
+
 function HobbiesScreen({ navigation }: HobbiesScreenProps) {
   const [showNewHobbyModal, setShowNewHobbyModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [hobbyName, setHobbyName] = useState('');
   const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [hobbies, setHobbies] = useState<Hobby[]>([]);
 
   React.useEffect(() => {
     if (navigation.setAsMain) {
@@ -379,9 +415,13 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
     }
   }, []);
 
-  const closeAllModals = () => {
+  const handleAddHobby = () => {
+    const newHobbyName = hobbyName.trim() || "Название хобби";
+
+    setHobbies([...hobbies, { name: newHobbyName }]);
+    
+    setHobbyName('');
     setShowNewHobbyModal(false);
-    setShowNotificationsModal(false);
   };
 
   return (
@@ -527,6 +567,24 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
                 <ArrowRightIcon />
               </View>
             </TouchableOpacity>
+
+            {hobbies.map((hobby, index) => (
+              <TouchableOpacity key={index} style={styles.hobbyItem}>
+                {/* Изображение иконки */}
+                <Image 
+                  source={require('./assets/pictures/hobbypictures.png')} 
+                  style={styles.Image} 
+                />
+
+                <View style={styles.hobbyTextWrapper}>
+                  <Text style={styles.hobbyText}>{hobby.name}</Text>
+                  <Text style={styles.hobbyStatus}></Text>
+                </View>
+                <View style={styles.arrowRightIcon}>
+                  <ArrowRightIcon />
+                </View>
+              </TouchableOpacity>
+            ))}
             
             <View style={styles.hobbyItem}>
               <StarIcon />
@@ -588,10 +646,7 @@ function HobbiesScreen({ navigation }: HobbiesScreenProps) {
             {/* Кнопка подтверждения */}
             <TouchableOpacity 
               style={styles.confirmButton}
-              onPress={() => {
-                // Логика сохранения заметки
-                setShowNewHobbyModal(false);
-              }}
+              onPress={handleAddHobby} // Используем новую функцию
             >
               <Text style={styles.confirmButtonText}>Добавить</Text>
             </TouchableOpacity>
@@ -737,12 +792,23 @@ function ProfileScreen({ navigation }: ProfileScreenProps) {
 }
 
 function CommunityScreen({ navigation }: CommunityScreenProps) {
-  const [activeTab, setActiveTab] = useState<'feed' | 'subscriptions'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'subscriptions'>('subscriptions');
   const [feedSearch, setFeedSearch] = useState('');
   const [subscriptionsSearch, setSubscriptionsSearch] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   const handleTabChange = (tab: 'feed' | 'subscriptions') => {
     setActiveTab(tab);
+  };
+
+  const handleCommunityPress = () => {
+    navigation.navigateToCommunityDetails();
+  };
+
+  const handleLikePress = () => {
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
   return (
@@ -806,28 +872,98 @@ function CommunityScreen({ navigation }: CommunityScreenProps) {
           />
         </View>
       </View>
-
+      
+      {/* Контент для вкладки "Сообщетва" */}
       {activeTab === 'feed' && (
         <View style={styles.feedContent}>
-          <Text style={styles.communitiesTitle}>Мои сообщества</Text>
-          
-          {/* Прямоугольник с кнопкой создания */}
-          <View style={styles.communityCreateCard}>
-            <TouchableOpacity style={styles.createSocietyButton}>
-              <View style={styles.createSocietyContainer}>
-                <CreateNewSocietyIcon />
-                <Text style={styles.createSocietyText}>Создать</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.subscriptionsTitle}>Подписки</Text>
+
         </View>
       )}
 
-      {/* Контент для вкладки "Подписки" */}
       {activeTab === 'subscriptions' && (
         <View style={styles.subscriptionsContent}>
-          <Text style={styles.subscriptionsTitle}>Подписки</Text>
-          {/* Здесь можно добавить другой контент для подписок */}
+
+          <Text style={styles.communitiesTitle}>Мои сообщества</Text>
+
+          <View style={styles.communityCreateCard}>
+            <View style={styles.orangeCircleContainer}>
+              <TouchableOpacity 
+                style={styles.orangeCircleWrapper}
+                onPress={handleCommunityPress}
+              >
+                <OrangeCircleIcon />
+                <View style={styles.cameraIconContainer}>
+                  <CameraIcon />
+                </View>
+              </TouchableOpacity>
+              <Text style={styles.cameraButtonText}>PhotoLUV</Text>
+            </View>
+            
+            {/* Группа кнопок справа */}
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity style={styles.createSocietyButton}>
+                <View style={styles.createSocietyContainer}>
+                  <CreateNewSocietyIcon />
+                  <Text style={styles.createSocietyText}>Создать</Text>
+                </View>
+              </TouchableOpacity>
+              
+              {/* Добавьте другие кнопки здесь, если нужно */}
+            </View>
+            
+          </View>
+          
+          {/* Новый прямоугольник с контентом */}
+          <View style={styles.postContainer}>
+            <View style={styles.postHeader}>
+
+            <TouchableOpacity onPress={handleCommunityPress}>
+              <View style={styles.postAuthorButton}>
+                <OrangeCircleIcon />
+                <View style={styles.postCameraIconContainer}>
+                  <CameraIcon />
+                </View>
+              </View>
+            </TouchableOpacity>
+              
+              <View style={styles.postAuthorInfo}>
+                <TouchableOpacity onPress={handleCommunityPress}>
+                  <Text style={styles.postAuthorName}>PhotoLUV</Text>
+                </TouchableOpacity>
+                <Text style={styles.postTime}>19 мин.</Text>
+              </View>
+            </View>
+            
+            {/* Текст поста */}
+            <Text style={styles.postText}>Поймал удачный кадр на закате!</Text>
+            
+            {/* Изображение поста */}
+            <Image 
+              source={require('./assets/pictures/image.png')} 
+              style={styles.postImage} 
+            />
+            
+            {/* Лайки и комментарии */}
+            <View style={styles.postActions}>
+            <TouchableOpacity 
+              style={styles.likeButton}
+              onPress={handleLikePress}
+            >
+              {isLiked ? <LikePressedIcon /> : <LikeUnPressedIcon />}
+              <Text style={styles.actionCount}>{likeCount}</Text>
+            </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.commentButton}
+
+              >
+                <ComentIcon />
+                <Text style={styles.actionCount}>0</Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
         </View>
       )}
 
@@ -1239,6 +1375,143 @@ function SettingScreen({ navigation }: SettingScreenProps) {
           <Text style={styles.PaintScreenTextFonts}>рисование</Text>
         </View>
       </View>
+    </View>
+  );
+}
+
+function CommunityDetailsScreen({ navigation }: CommunityDetailsScreenProps) {
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubscribePress = () => {
+    setIsSubscribed(!isSubscribed);
+  };
+
+  return (
+    <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
+      <View style={styles.UpperPanel}>
+        <BackGroundGradientOrange />
+      </View>
+
+      <ScrollView 
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity 
+          style={styles.ThreeStripedButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowToBack />
+        </TouchableOpacity>
+
+        {/* Аватар сообщества */}
+        <View style={styles.communityAvatarContainer}>
+          <View style={styles.orangeCirclePlace}>
+            <OrangeCircleIcon />
+            <View style={styles.cameraIconPlace}>
+              <CameraIcon />
+            </View>
+          </View>
+          <Text style={styles.communityName}>PhotoLUV</Text>
+          <Text style={styles.subscribersCount}>1.234 подписчика</Text>
+        </View>
+
+        {/* Описание сообщества */}
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.descriptionTitle}>Описание</Text>
+          <Text style={styles.descriptionText}>
+            Добро пожаловать в уголок визуальной магии! Здесь каждый кадр — история, каждое фото...
+          </Text>
+        </View>
+
+        {/* Кнопки */}
+        <View style={styles.buttonsContainers}>
+          <TouchableOpacity 
+            style={[
+              styles.subscribeButton,
+              isSubscribed && styles.subscribedButton
+            ]}
+            onPress={handleSubscribePress}
+          >
+            <Text style={[
+              styles.subscribeButtonText,
+              isSubscribed && styles.subscribedButtonText
+            ]}>
+              {isSubscribed ? 'Отписаться' : 'Подписаться'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.newPostButton,
+              isSubscribed && styles.activeNewPostButton
+            ]}
+          >
+            <Text style={[
+              styles.newPostButtonText,
+              isSubscribed && styles.activeNewPostButtonText
+            ]}>
+              Новый пост
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Разделительная линия */}
+        <View style={styles.dividerLine} />
+
+        {/* Поле поиска */}
+        <View style={styles.communitySearchContainer}>
+          <View style={styles.communitySearchBackground}>
+            <View style={styles.communitySearchIcon}>
+              <SearchIcon />
+            </View>
+            <TextInput
+              style={styles.communitySearchInput}
+              placeholder="Поиск"
+              placeholderTextColor="#62281B"
+              editable={false}
+            />
+          </View>
+        </View>
+
+        {/* Количество публикаций */}
+        <Text style={styles.postsCount}>54 публикации</Text>
+
+        {/* Пост */}
+        <View style={styles.postContainers}>
+          <View style={styles.postHeader}>
+            <View style={styles.postAuthorButton}>
+              <OrangeCircleIcon />
+              <View style={styles.postCameraIconContainer}>
+                <CameraIcon />
+              </View>
+            </View>
+            
+            <View style={styles.postAuthorInfo}>
+              <Text style={styles.postAuthorName}>PhotoLUV</Text>
+              <Text style={styles.postTime}>19 мин.</Text>
+            </View>
+          </View>
+          
+          <Text style={styles.postText}>Поймал удачный кадр на закате!</Text>
+          
+          <Image 
+            source={require('./assets/pictures/image.png')} 
+            style={styles.postImage} 
+          />
+          
+          <View style={styles.postActions}>
+            <View style={styles.likeContainer}>
+              <LikePressedIcon />
+              <Text style={styles.actionCount}>42</Text>
+            </View>
+            
+            <View style={styles.commentContainer}>
+              <ComentIcon />
+              <Text style={styles.actionCount}>0</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }

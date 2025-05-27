@@ -3,6 +3,336 @@ import { Dimensions, StyleSheet } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+
+  Image: {
+    width: 51,
+    height: 60,
+    marginLeft: 0,
+    marginBottom: 0,
+  },
+
+  buttonsContainers: {
+    paddingHorizontal: 16,
+    marginTop: 20,
+  },
+  
+  subscribeButton: {
+    width: 370,
+    height: 40,
+    borderRadius: 25,
+    backgroundColor: '#F47530',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  
+  subscribedButton: {
+    backgroundColor: '#FEE5CE',
+    opacity: 0.5,
+  },
+  
+  subscribeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontFamily: 'IdealistSans',
+    fontSize: 20,
+  },
+  
+  subscribedButtonText: {
+    color: '#F57F40',
+    fontWeight: 'bold',
+    fontFamily: 'IdealistSans',
+  },
+  
+  newPostButton: {
+    width: 370,
+    height: 40,
+    borderRadius: 25,
+    backgroundColor: '#FEE5CE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.5,
+  },
+  
+  activeNewPostButton: {
+    backgroundColor: '#FFFFFF',
+    opacity: 1,
+  },
+  
+  newPostButtonText: {
+    color: '#62281B',
+    fontWeight: 'bold',
+    fontFamily: 'IdealistSans',
+    fontSize: 20,
+    opacity: 0.5,
+  },
+
+  activeNewPostButtonText: {
+    color: '#62281B',
+    opacity: 1,
+  },
+  
+  scrollContainer: {
+    flex: 1,
+     marginTop: -25,
+  },
+  communityAvatarContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  communityName: {
+    fontFamily: 'IgraSans',
+    fontSize: 32,
+    color: '#62281B',
+    marginTop: 40,
+    letterSpacing: -0.5,
+    fontWeight: 'bold',
+  },
+  subscribersCount: {
+    fontSize: 15,
+    color: '#62281B',
+    fontFamily: 'IdealistSans',
+    letterSpacing: -0.5,
+    fontWeight: 'bold',
+  },
+  descriptionContainer: {
+    width: 370,
+    height: 79,
+    marginTop: 10,
+    marginHorizontal: 15,
+    borderRadius: 20,
+    backgroundColor: '#FEE5CE',
+    padding: 15,
+    
+  },
+  descriptionTitle: {
+    color: '#62281B',
+    fontFamily: 'IdealistSans',
+    fontSize: 13,
+    letterSpacing: -0.5,
+    opacity: 0.5,
+    marginTop: -7,
+  },
+  descriptionText: {
+    color: '#62281B',
+    fontWeight: 'bold',
+    fontFamily: 'IdealistSans',
+    fontSize: 14,
+    marginTop: 5,
+    width: 350,
+    height: 40,
+    
+  },
+  
+  dividerLine: {
+    borderWidth: 1,
+    borderColor: '#B0877457',
+    marginVertical: 10,
+    width: 370,
+    marginLeft: 16,
+  },
+  postsCount: {
+    color: '#62281B',
+    fontFamily: 'IdealistSans',
+    fontSize: 13,
+    marginLeft: 25,
+    opacity: 0.5,
+    marginTop: 15,
+  },
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 20,
+  },
+
+  postAuthorButton: {
+    position: 'relative',
+    width: 40,
+    height: 40,
+    marginRight: 10,
+    marginTop: -20,
+  },
+  
+  postCameraIconContainer: {
+    position: 'absolute',
+    top: '7%',
+    left: '20%',
+  },
+
+  communityCreateCard: {
+    width: 370,
+    height: 100,
+    backgroundColor: '#FEE5CE',
+    borderRadius: 25,
+    marginLeft: -1,
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  
+  orangeCircleContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+
+  orangeCirclePlace: {
+    marginTop: 100,
+    position: 'relative',
+    marginLeft: -4,
+    transform: [{ scale: 2.0 }],
+    borderRadius: 50,
+    borderWidth: 1.5,
+    borderColor: '#62281B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  cameraIconPlace: {
+    position: 'absolute',
+    top: '5%',
+    left: '1.5%',
+  },
+  
+  orangeCircleWrapper: {
+    position: 'relative',
+    width: 60,
+    height: 60,
+    marginLeft: -4,
+  },
+  
+  cameraIconContainer: {
+    position: 'absolute',
+    top: '5%',
+    left: '12%',
+  },
+  
+  cameraButtonText: {
+    fontFamily: 'IdealistSans',
+    fontSize: 12,
+    color: '#62281B',
+    marginTop: 5,
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+  
+  buttonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  createSocietyButton: {
+    marginLeft: 12,
+  },
+  
+  createSocietyContainer: {
+    alignItems: 'center',
+  },
+  
+  createSocietyText: {
+    fontFamily: 'IdealistSans',
+    fontSize: 12,
+    color: '#62281B',
+    marginTop: 5,
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+  
+  cameraWithTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  cameraIconStyle: {
+    marginRight: 10,
+  },
+  
+  postContainer: {
+    width: 370,
+    borderRadius: 25,
+    backgroundColor: '#FEE5CE',
+    marginTop: 9,
+    padding: 16,
+  },
+
+  postContainers: {
+    width: 370,
+    borderRadius: 25,
+    backgroundColor: '#FEE5CE',
+    marginTop: 9,
+    padding: 16,
+    marginLeft: 15,
+  },
+  
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  
+  postAuthorInfo: {
+    flexDirection: 'column',
+    marginLeft: 20,
+  },
+  
+  postAuthorName: {
+    fontFamily: 'IgraSans',
+    fontSize: 20,
+    color: '#62281B',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+  
+  postTime: {
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
+    color: '#62281B',
+    opacity: 0.5,
+  },
+
+  postImage: {
+    width: 370,
+    height: 300,
+    marginLeft: -16,
+    marginBottom: 12,
+  },
+
+  likeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  postText: {
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
+    color: '#62281B',
+    marginBottom: 12,
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+  
+  postActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+  
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  actionCount: {
+    fontFamily: 'IdealistSans',
+    fontSize: 14,
+    color: '#62281B',
+    marginLeft: 5,
+  },
+
   emptyDay: {
     width: 36,
     height: 36,
@@ -80,44 +410,14 @@ export const styles = StyleSheet.create({
     marginVertical: 1,
   },
 
-  createSocietyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    left: -15,
-    top: 3,
-  },
-  
-  createSocietyText: {
-    fontFamily: 'IdealistSans',
-    fontSize: 12,
-    color: '#62281B',
-    marginTop: 5,
-  },
-
   communitiesTitle: {
     fontFamily: 'IgraSans',
     fontWeight: '400',
     fontSize: 20,
     color: '#62281B',
-    marginTop: 20,
-    marginBottom: 5,
-    marginLeft: 10,
-  },
-
-  communityCreateCard: {
-    width: 370,
-    height: 100,
-    backgroundColor: '#FEE5CE',
-    borderRadius: 25,
-    marginLeft: 4,
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  createSocietyButton: {
-    marginLeft: 20,
-    padding: 10,
+    marginTop: 12,
+    marginBottom: -6,
+    marginLeft: 17,
   },
 
   subscriptionsTitle: {
@@ -161,14 +461,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: 15,
+    paddingLeft: 20,
   },
 
   communitySearchInput: {
     flex: 1,
     color: '#62281B',
-    fontFamily: 'IgraSans',
-    fontSize: 16,
+    fontFamily: 'IdealistSans',
+    fontSize: 18,
     paddingLeft: 8,
     paddingTop: 3,
     paddingBottom: 0,
@@ -178,7 +478,7 @@ export const styles = StyleSheet.create({
   },
 
   communityTabText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#62281B',
     fontFamily: 'IgraSans',
     textAlign: 'center',
@@ -190,7 +490,7 @@ export const styles = StyleSheet.create({
   },
 
   communityActiveTabText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#62281B',
     fontFamily: 'IgraSans',
     textAlign: 'center',
@@ -223,7 +523,7 @@ export const styles = StyleSheet.create({
   communityTabsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 40,
+    marginTop: 20,
     marginBottom: 15,
     paddingHorizontal: 16,
     width: '100%',
@@ -234,7 +534,7 @@ export const styles = StyleSheet.create({
   },
 
   communitySearchContainer: {
-    paddingLeft: 16,
+    marginLeft: 16,
     paddingRight: 16,
     marginBottom: -10,
     alignSelf: 'flex-start',
@@ -255,7 +555,7 @@ export const styles = StyleSheet.create({
   },
 
   communitySearchIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   
   communityContentContainer: {
@@ -373,6 +673,7 @@ export const styles = StyleSheet.create({
   profileContainer: {
     flex: 1,
     padding: 30,
+    marginTop: -25
   },
 
   avatarContainerOnProfile: {
@@ -732,6 +1033,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 35,
     justifyContent: 'center',
+    marginTop: -25,
   },
 
   background: {
@@ -933,6 +1235,8 @@ export const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
     transform: [{ scaleX: 1.15 }],
+    width: '100%',
+    marginLeft: '80%'
   },
 
   buttonText2: {
@@ -943,6 +1247,8 @@ export const styles = StyleSheet.create({
     textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 1,
     transform: [{ scaleX: 1.05 }],
+    width: '100%',
+    marginLeft: '50%'
   },
 
   buttonstyle: {
@@ -970,7 +1276,7 @@ export const styles = StyleSheet.create({
   backButtonText: {
     color: '#FF6F3B',
     fontFamily: 'IgraSans',
-    fontSize: 16,
+    fontSize: 1,
   },
 
   registerButtonText: {
@@ -980,11 +1286,6 @@ export const styles = StyleSheet.create({
     textShadowColor: 'rgba(255, 255, 255, 0.75)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
-  },
-
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
   },
 
   inputField: {
