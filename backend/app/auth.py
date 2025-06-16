@@ -1,11 +1,12 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 from passlib.hash import bcrypt
 from sqlmodel import Session, select
 from .models import User
 from .database import get_session
-from .email_utils import send_verification_email
+from .email_utils import send_verification_email, send_welcome_email
+from .jwt_utils import verify_email_token
 from uuid import UUID
 from typing import Optional
 from datetime import datetime, timedelta
@@ -28,22 +29,87 @@ async def create_access_token(data: dict, expires_delta: Optional[timedelta] = N
     return encoded_jwt
 
 @router.post("/register")
-async def register(email: EmailStr, password: str, password_confirm: str, session: Session = Depends(get_session)):
+def register(email: EmailStr, password: str, password_confirm: str, session: Session = Depends(get_session)):
+    """Регистрация нового пользователя"""
     if password != password_confirm:
         raise HTTPException(status_code=400, detail="Passwords do not match")
     
-    user = session.exec(select(User).where(User.email == email)).first()
-    if user:
+    existing_user = session.exec(select(User).where(User.email == email)).first()
+    if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     hashed_password = bcrypt.hash(password)
-    new_user = User(email=email, hashed_password=hashed_password)
+    new_user = User(
+        email=email, 
+        hashed_password=hashed_password,
+        is_active=False,
+        is_verified=False
+    )
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
 
-    await send_verification_email(new_user.email, str(new_user.id))
-    return {"message": "User registered successfully, please check your email to verify your account."}
+    email_sent = send_verification_email(new_user.email, str(new_user.id))
+    
+    if not email_sent:
+        raise HTTPException(
+            status_code=500, 
+            detail="Failed to send verification email. Please try again."
+        )
+    
+    return {
+        "message": "User registered successfully. Please check your email to verify your account.",
+        "email": email
+    }
+
+@router.get("/verify-email")
+def verify_email(token: str, session: Session = Depends(get_session)):
+    """Верификация email по токену"""
+    payload = verify_email_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid or expired verification token"
+        )
+    
+    user_id = payload.get("user_id")
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.email != payload.get("email"):
+        raise HTTPException(status_code=400, detail="Token email mismatch")
+    
+    if user.is_verified:
+        return {"message": "Email already verified"}
+    
+    user.is_verified = True
+    user.is_active = True
+    session.add(user)
+    session.commit()
+    
+    send_welcome_email(user.email, user.nickname or user.email.split('@')[0])
+    
+    return {"message": "Email successfully verified! You can now log in."}
+
+@router.post("/resend-verification")
+def resend_verification_email(email: EmailStr, session: Session = Depends(get_session)):
+    """Повторная отправка письма для верификации"""
+    user = session.exec(select(User).where(User.email == email)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_verified:
+        raise HTTPException(status_code=400, detail="Email already verified")
+    
+    email_sent = send_verification_email(user.email, str(user.id))
+    if not email_sent:
+        raise HTTPException(
+            status_code=500, 
+            detail="Failed to resend verification email"
+        )
+    
+    return {"message": "Verification email resent successfully"}
 
 @router.get("/confirm/{user_id}")
 async def confirm_email(user_id: UUID, session: Session = Depends(get_session)):
