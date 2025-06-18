@@ -66,6 +66,5 @@ export const styles = StyleSheet.create({
     pressedButton: {
         opacity: 0.7,
         transform: [{ scale: 0.95 }],
-    },
-
+    }
 });

@@ -152,5 +152,5 @@ export const styles = StyleSheet.create({
 
   switchContainer: {
     padding: 10,
-  },
+  }
 });

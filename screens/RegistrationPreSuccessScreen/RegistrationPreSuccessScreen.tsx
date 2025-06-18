@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 import { RegistrationPreSuccessScreenNavigationProp } from '../../types';
@@ -10,7 +10,6 @@ const RegistrationPreSuccessScreen = () => {
 
   const handlePress = () => {
     setPressed(true);
-    // Здесь логика для повторной отправки письма
     console.log('Повторная отправка письма');
     
     setTimeout(() => setPressed(false), 200);

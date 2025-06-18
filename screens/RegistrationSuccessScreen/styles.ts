@@ -1,6 +1,4 @@
-import { Dimensions, StyleSheet } from 'react-native';
-
-const { height } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     background: {
@@ -107,7 +105,5 @@ export const styles = StyleSheet.create({
         textShadowColor: 'rgba(255, 255, 255, 0.75)',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 1,
-      },
-
-      
+      } 
 });

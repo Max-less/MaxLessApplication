@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, Image, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
+import { ScrollView, View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
 import ArrowToBack from '../../assets/icons/ArrowToBack';
@@ -13,10 +13,6 @@ import ComentIcon from '../../assets/icons/ComentIcon';
 import { useNavigation } from '@react-navigation/native';
 
 import { styles } from './styles';
-
-
-
-
 
 const CommunityDetailsScreen = () => {
   const navigation = useNavigation();

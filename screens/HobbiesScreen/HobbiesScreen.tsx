@@ -11,18 +11,14 @@ import SwitchOffIcon from '../../assets/icons/SwitchOffIcon';
 import SwitchOnIcon from '../../assets/icons/SwitchOnIcon';
 import AddPictureOnCreatingHobby from '../../assets/icons/AddPictureOnCreatingHobby';
 import CommunityIcon from '../../assets/icons/CommunityIcon';
-import YogaIcon from "../../assets/icons/YogaIcon";
 import StarIcon from '../../assets/icons/StarIcon';
 import ArrowRightIcon from '../../assets/icons/ArrowRightIcon';
-import PaintIcon from "../../assets/icons/PaintIcon";
 import BellIcon from '../../assets/icons/BellIcon';
-import GuitarIcon from "../../assets/icons/GuitarIcon";
 import NewHobbyIcon from '../../assets/icons/NewHobbyIcon';
-import BookIcon from "../../assets/icons/BookIcon";
 import ThreeStripedIcon from '../../assets/icons/ThreeStripedIcon';
 import ActiveCommunityIcon from '../../assets/icons/ActiveCommunityIcon';
 
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -30,18 +26,61 @@ import { styles } from './styles';
 
 import { HobbiesScreenNavigationProp } from '../../types';
 
+import { ImageSourcePropType } from 'react-native';
+
 
 
 const HobbiesScreen = () => {
+
+  type HobbyImageKey = 'guitar' | 'book' | 'yoga' | 'paint' | 'default';
+
   interface Hobby {
     name: string;
+    imageKey: HobbyImageKey;
+    status?: string;
+    goal?: string;
   }
+
+  const HOBBY_IMAGES: Record<HobbyImageKey, ImageSourcePropType> = {
+    guitar: require('../../assets/pictures/GuitarArt.png'),
+    book: require('../../assets/pictures/BookArt.png'),
+    yoga: require('../../assets/pictures/YogaArt.png'),
+    paint: require('../../assets/pictures/PaintArt.png'),
+    default: require('../../assets/pictures/HobbyPictures.png'),
+  };
+
+  const DEFAULT_IMAGE_KEY: HobbyImageKey = 'default';
+
+  const getHobbyImage = (key: string): ImageSourcePropType => {
+    return HOBBY_IMAGES[key as HobbyImageKey] || HOBBY_IMAGES[DEFAULT_IMAGE_KEY];
+  };
 
   const [showNewHobbyModal, setShowNewHobbyModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [hobbyName, setHobbyName] = useState('');
   const [remindersEnabled, setRemindersEnabled] = useState(true);
-  const [hobbies, setHobbies] = useState<Hobby[]>([]);
+  const [hobbies, setHobbies] = useState<Hobby[]>([
+    {
+      name: 'ГИТАРА',
+      imageKey: 'guitar',
+      status: 'Не занимались 3 дня'
+    },
+    {
+      name: 'КНИГИ',
+      imageKey: 'book',
+      status: '103 из 230 страниц'
+    },
+    {
+      name: 'ЙОГА',
+      imageKey: 'yoga',
+      status: '17 дней подряд'
+    },
+    {
+      name: 'РИСОВАНИЕ',
+      imageKey: 'paint',
+      status: 'Не занимались 5 дней'
+    }
+  ]);
 
   const navigation = useNavigation<HobbiesScreenNavigationProp>();
 
@@ -51,13 +90,47 @@ const HobbiesScreen = () => {
     }
   }, []);
 
+  React.useEffect(() => {
+    const loadHobbies = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('@hobbies');
+        if (saved) setHobbies(JSON.parse(saved));
+      } catch (e) {
+        console.error('Ошибка загрузки', e);
+      }
+    };
+    loadHobbies();
+  }, []);
+  
+  React.useEffect(() => {
+    const saveHobbies = async () => {
+      try {
+        await AsyncStorage.setItem('@hobbies', JSON.stringify(hobbies));
+      } catch (e) {
+        console.error('Ошибка сохранения', e);
+      }
+    };
+    saveHobbies();
+  }, [hobbies]);
+
+  // AsyncStorage.removeItem('@hobbies');
+  // AsyncStorage.clear();
+
   const handleAddHobby = () => {
-    const newHobbyName = hobbyName.trim() || "Название хобби";
-
-    setHobbies([...hobbies, { name: newHobbyName }]);
-
+    const newHobby: Hobby = {
+      name: hobbyName.trim() || "Новое хобби",
+      imageKey: DEFAULT_IMAGE_KEY,
+      status: 'Новое хобби'
+    };
+    
+    setHobbies([...hobbies, newHobby]);
     setHobbyName('');
     setShowNewHobbyModal(false);
+    
+    navigation.navigate('Drawing', {
+      hobbyName: newHobby.name,
+      hobbyImage: HOBBY_IMAGES[newHobby.imageKey],
+    });
   };
 
   const goToProfile = () => {
@@ -162,64 +235,22 @@ const HobbiesScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.content}>
-            <TouchableOpacity style={styles.hobbyItem}>
-              <GuitarIcon />
-              <View style={styles.hobbyTextWrapper}>
-                <Text style={styles.hobbyText}>ГИТАРА</Text>
-                <Text style={styles.hobbyStatus}>Не занимались 3 дня</Text>
-              </View>
-              <View style={styles.arrowRightIcon} >
-                <ArrowRightIcon />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.hobbyItem}>
-              <BookIcon />
-              <View style={styles.hobbyTextWrapper}>
-                <Text style={styles.hobbyText}>КНИГИ</Text>
-                <Text style={styles.hobbyStatus}>103 из 230 страниц</Text>
-              </View>
-              <View style={styles.arrowRightIcon} >
-                <ArrowRightIcon />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.hobbyItem}>
-              <YogaIcon />
-              <View style={styles.hobbyTextWrapper}>
-                <Text style={styles.hobbyText}>ЙОГА</Text>
-                <Text style={styles.hobbyStatus}>17 дней подряд</Text>
-              </View>
-              <View style={styles.arrowRightIcon} >
-                <ArrowRightIcon />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.hobbyItem}
-              onPress={() => navigation.navigate('Drawing')}
-            >
-              <PaintIcon />
-              <View style={styles.hobbyTextWrapper}>
-                <Text style={styles.hobbyText}>РИСОВАНИЕ</Text>
-                <Text style={styles.hobbyStatus}>Не занимались 5 дней</Text>
-              </View>
-              <View style={styles.arrowRightIcon} >
-                <ArrowRightIcon />
-              </View>
-            </TouchableOpacity>
-
             {hobbies.map((hobby, index) => (
-              <TouchableOpacity key={index} style={styles.hobbyItem}>
-                {/* Изображение иконки */}
+              <TouchableOpacity 
+                key={index} 
+                style={styles.hobbyItem}
+                onPress={() => navigation.navigate('Drawing', { 
+                  hobbyName: hobby.name,
+                  hobbyImage: getHobbyImage(hobby.imageKey),
+                })}
+              >
                 <Image
-                  source={require('../../assets/pictures/hobbypictures.png')}
-                  style={styles.Image}
+                  source={getHobbyImage(hobby.imageKey)}
+                  style={{ width: 50, height: 50 }}
                 />
-
                 <View style={styles.hobbyTextWrapper}>
                   <Text style={styles.hobbyText}>{hobby.name}</Text>
-                  <Text style={styles.hobbyStatus}></Text>
+                  <Text style={styles.hobbyStatus}>{hobby.status}</Text>
                 </View>
                 <View style={styles.arrowRightIcon}>
                   <ArrowRightIcon />
@@ -309,7 +340,6 @@ const HobbiesScreen = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Уведомления</Text>
             </View>
-
 
           </View>
         </View>

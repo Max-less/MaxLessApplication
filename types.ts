@@ -6,8 +6,8 @@ export type RootStackParamList = {
   Community: undefined;
   CommunityDetails: undefined;
   Profile: undefined;
-  Drawing: undefined;
-  Settings: undefined;
+  Drawing: { hobbyName?: string; hobbyImage?: any; isNew?: boolean };
+  Settings: { hobbyName?: string; hobbyImage?: any };
   Registration: undefined;
   RegistrationSuccess: undefined;
   RegistrationPreSuccess: undefined;

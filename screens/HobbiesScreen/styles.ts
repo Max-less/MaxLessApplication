@@ -190,13 +190,6 @@ export const styles = StyleSheet.create({
         marginBottom: 10,
     },
 
-    Image: {
-        width: 51,
-        height: 60,
-        marginLeft: 0,
-        marginBottom: 0,
-    },
-
     modalOverlay: {
         position: 'absolute',
         top: 0,

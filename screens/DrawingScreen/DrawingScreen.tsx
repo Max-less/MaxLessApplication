@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
-import PaintOpacityArt from '../../assets/icons/PaintOpacityArt';
 import WhiteRectangle from '../../assets/icons/WhiteRectangle';
 import ArrowToBack from '../../assets/icons/ArrowToBack';
 import NewHobbyIcon from '../../assets/icons/NewHobbyIcon';
@@ -10,28 +9,88 @@ import CloseCreatingHobbyIcon from "../../assets/icons/CloseCreatingHobbyIcon";
 import NewMediaNoteIcon from '../../assets/icons/NewMediaNoteIcon';
 import NewTextNoteIcon from '../../assets/icons/NewTextNoteIcon';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { styles } from './styles';
 
-import { DrawingScreenNavigationProp } from '../../types';
-
-
+import { RootStackParamList, DrawingScreenNavigationProp } from '../../types';
 
 const DrawingScreen = () => {
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('tracking');
   const [showNewNoteModal, setShowNewNoteModal] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, target: 0 });
+  const [goalText, setGoalText] = useState('Скорее добавьте цель');
 
   const navigation = useNavigation<DrawingScreenNavigationProp>();
 
+  const route = useRoute<RouteProp<RootStackParamList, 'Drawing'>>();
+  const params = route.params;
+  
+  const [hobbyData, setHobbyData] = useState({
+    name: params?.hobbyName || 'рисование',
+    image: params?.hobbyImage || require('../../assets/pictures/PaintArt.png'),
+    isNew: params?.isNew || false
+  });
+
   const goToSettings = () => {
-    navigation.navigate('Settings');
+    navigation.navigate('Settings', { 
+      hobbyName: params?.hobbyName || 'рисование',
+      hobbyImage: params?.hobbyImage || require('../../assets/pictures/PaintArt.png')
+    });
   };
+
+  React.useEffect(() => {
+    if (params) {
+      setHobbyData({
+        name: params.hobbyName || 'рисование',
+        image: params.hobbyImage || require('../../assets/pictures/PaintArt.png'),
+        isNew: params.isNew || false
+      });
+    }
+  }, [params]);
+
+  React.useEffect(() => {
+    const loadGoal = async () => {
+      try {
+        const savedGoals = await AsyncStorage.getItem('@hobbyGoals');
+        const goals = savedGoals ? JSON.parse(savedGoals) : {};
+        const hobbyGoal = goals[params?.hobbyName || ''] || 'Скорее добавьте цель';
+        setGoalText(hobbyGoal);
+      } catch (e) {
+        console.error('Ошибка загрузки цели', e);
+      }
+    };
+    loadGoal();
+  }, [params?.hobbyName]);
+
+  React.useEffect(() => {
+    const loadProgressData = async () => {
+      try {
+        const hobbyName = params?.hobbyName || '';
+        
+        const savedProgress = await AsyncStorage.getItem('@hobbyProgress');
+        if (savedProgress) {
+          const progressData = JSON.parse(savedProgress);
+          setProgress(progressData[hobbyName] || { current: 0, target: 0 });
+        }
+        
+        const savedGoals = await AsyncStorage.getItem('@hobbyGoals');
+        if (savedGoals) {
+          const goals = JSON.parse(savedGoals);
+          setGoalText(goals[hobbyName] || 'Скорее добавьте цель');
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки данных', e);
+      }
+    };
+    
+    loadProgressData();
+  }, [params?.hobbyName]);
 
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
-      {/* Основной контент с возможным затемнением */}
       <View style={[styles.container, showNewNoteModal && { opacity: 0.6 }]}>
 
         <View style={styles.UpperPanel}>
@@ -39,11 +98,40 @@ const DrawingScreen = () => {
         </View>
 
         <View style={styles.paintOpacityArtContainer}>
-          <PaintOpacityArt />
+          <Image
+            source={params?.hobbyImage || hobbyData.image}
+            style={{
+              width: 320,
+              height: 320,
+              opacity: 0.15
+            }}
+          />
         </View>
 
         <View style={styles.whiteRectangleContainer}>
           <WhiteRectangle />
+          <View style={styles.yourGoal}>
+            <Text style={styles.yourGoalText}>{goalText}</Text>
+          </View>
+
+          <View style={styles.progressTextContainer}>
+            <Text style={styles.progressText}>
+              {progress.current} из {progress.target || '?'}
+            </Text>
+          </View>
+
+          <View style={styles.progressBarContainer}>
+            <View 
+              style={[
+                styles.progressBarFill,
+                { 
+                  width: `${progress.target > 0 
+                    ? Math.min(100, (progress.current / progress.target) * 100) 
+                    : 0}%` 
+                }
+              ]}
+            />
+          </View>
 
           <View style={styles.tabsContainer}>
             <View style={styles.buttonsRow}>
@@ -101,7 +189,7 @@ const DrawingScreen = () => {
         </TouchableOpacity>
 
         <View style={styles.PaintScreenText}>
-          <Text style={styles.PaintScreenTextFonts}>рисование</Text>
+          <Text style={styles.PaintScreenTextFonts}>{hobbyData.name}</Text>
         </View>
 
         <TouchableOpacity
@@ -146,7 +234,6 @@ const DrawingScreen = () => {
               <TouchableOpacity
                 style={styles.iconContainer}
                 onPress={() => {
-                  // Логика сохранения заметки
                   setShowNewNoteModal(false);
                 }}
               >

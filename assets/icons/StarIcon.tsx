@@ -2,9 +2,9 @@ import * as React from "react";
 import Svg, { Path } from "react-native-svg";
 const StarIcon = () => (
   <Svg
-    width={46}
-    height={44}
-    viewBox="0 0 46 44"
+    width={49}
+    height={49}
+    viewBox="0 0 49 49"
     fill="none"
   >
     <Path

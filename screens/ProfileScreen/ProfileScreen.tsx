@@ -34,7 +34,6 @@ const ProfileScreen = () => {
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
       <View style={styles.profileContainer}>
-        {/* Фон */}
         <View style={styles.UpperPanel}>
           <BackGroundGradientOrange />
         </View>

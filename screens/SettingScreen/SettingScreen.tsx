@@ -1,39 +1,201 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, Image, TextInput } from 'react-native';
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
-import PaintOpacityArt from '../../assets/icons/PaintOpacityArt';
 import WhiteRectangle from '../../assets/icons/WhiteRectangle';
 import PointerRight from '../../assets/icons/PointerRight';
 import PointerLeft from '../../assets/icons/PointerLeft';
 import SwitchOffIcon from '../../assets/icons/SwitchOffIcon';
 import SwitchOnIcon from '../../assets/icons/SwitchOnIcon';
 import ArrowToBack from '../../assets/icons/ArrowToBack';
+import CloseCreatingHobbyIcon from "../../assets/icons/CloseCreatingHobbyIcon";
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { styles } from './styles';
-import { SettingsScreenNavigationProp } from '../../types';
 
+import { RootStackParamList, SettingsScreenNavigationProp } from '../../types';
 
 
 const SettingScreen = () => {
+  interface Hobby {
+    name: string;
+    imageKey: 'guitar' | 'book' | 'yoga' | 'paint' | 'default';
+    status?: string;
+    goal?: string;
+  }
+
+  interface ProgressData {
+    current: number;
+    target: number;
+  }
+
+  const [progress, setProgress] = useState<ProgressData>({ current: 0, target: 0 });
+  const [modalProgress, setModalProgress] = useState({ current: 0, target: 0 });
+  const [isTargetLocked, setIsTargetLocked] = useState(false);
+
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('settings');
   const [isSwitchOn, setIsSwitchOn] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(4);
   const [currentYear, setCurrentYear] = useState(2025);
-  const [selectedDates, setSelectedDates] = useState<{ [key: string]: number[] }>({});
+  const [selectedDates, setSelectedDates] = useState<{[key: string]: number[]}>({});
+  const [showChangeGoalModal, setShowChangeGoalModal] = useState(false);
+  const [showAddYourProgressModal, setShowAddYourProgressModal] = useState(false);
 
+  
+
+  const route = useRoute<RouteProp<RootStackParamList, 'Settings'>>();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
+  const [hobbyData, setHobbyData] = useState({
+    name: route.params?.hobbyName || 'рисование',
+    image: route.params?.hobbyImage || require('../../assets/pictures/PaintArt.png')
+  });
 
-  const goToDrawing = () => {
-    navigation.navigate('Drawing')
+  const [goalText, setGoalText] = useState('Скорее добавьте цель');
+  const [inputText, setInputText] = useState('');
+
+  const handleChangeGoal = async () => {
+    if (inputText.trim()) {
+      try {
+        const savedGoals = await AsyncStorage.getItem('@hobbyGoals');
+        const goals = savedGoals ? JSON.parse(savedGoals) : {};
+        goals[params?.hobbyName || ''] = inputText;
+        await AsyncStorage.setItem('@hobbyGoals', JSON.stringify(goals));
+        
+        setGoalText(inputText);
+        setInputText('');
+        setShowChangeGoalModal(false);
+      } catch (e) {
+        console.error('Ошибка сохранения цели', e);
+      }
+    }
   };
 
-  const goToHobbies = () => {
-    navigation.navigate('Hobbies')
+  const params = route.params;
+  const hobbyName = params?.hobbyName || 'рисование';
+  
+  React.useEffect(() => {
+    if (route.params) {
+      setHobbyData({
+        name: route.params.hobbyName || 'рисование',
+        image: route.params.hobbyImage || require('../../assets/pictures/PaintArt.png')
+      });
+    }
+  }, [route.params]);
+
+  React.useEffect(() => {
+    const loadGoal = async () => {
+      try {
+        const savedGoals = await AsyncStorage.getItem('@hobbyGoals');
+        const goals = savedGoals ? JSON.parse(savedGoals) : {};
+        const hobbyGoal = goals[params?.hobbyName || ''] || 'Скорее добавьте цель';
+        setGoalText(hobbyGoal);
+      } catch (e) {
+        console.error('Ошибка загрузки цели', e);
+      }
+    };
+    loadGoal();
+  }, [params?.hobbyName]);
+
+  React.useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const savedProgress = await AsyncStorage.getItem('@hobbyProgress');
+        if (savedProgress) {
+          const progressData = JSON.parse(savedProgress);
+          const hobbyProgress = progressData[params?.hobbyName || ''] || { current: 0, target: 0 };
+          setProgress(hobbyProgress);
+          setIsTargetLocked(hobbyProgress.target > 0);
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки прогресса', e);
+      }
+    };
+    loadProgress();
+  }, [params?.hobbyName]);
+
+  React.useEffect(() => {
+    const loadSelectedDates = async () => {
+      try {
+        const savedDates = await AsyncStorage.getItem(`@selectedDates_${hobbyName}`);
+        if (savedDates) {
+          setSelectedDates(JSON.parse(savedDates));
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки дат', e);
+      }
+    };
+    loadSelectedDates();
+  }, [hobbyName]);
+  
+  React.useEffect(() => {
+    const saveSelectedDates = async () => {
+      try {
+        await AsyncStorage.setItem(
+          `@selectedDates_${hobbyName}`,
+          JSON.stringify(selectedDates)
+        );
+      } catch (e) {
+        console.error('Ошибка сохранения дат', e);
+      }
+    };
+    saveSelectedDates();
+  }, [selectedDates, hobbyName]);
+
+  const handleBackToTracking = () => {
+    navigation.navigate('Drawing', { 
+      hobbyName: params?.hobbyName,
+      hobbyImage: params?.hobbyImage,
+      isNew: false
+    });
+  };
+
+  const defaultImage = require('../../assets/pictures/PaintArt.png');
+
+  const handleAddProgress = async () => {
+    const newProgress = {
+      current: progress.current + modalProgress.current,
+      target: isTargetLocked ? progress.target : modalProgress.target
+    };
+  
+    try {
+      const savedProgress = await AsyncStorage.getItem('@hobbyProgress');
+      const allProgress = savedProgress ? JSON.parse(savedProgress) : {};
+      allProgress[params?.hobbyName || ''] = newProgress;
+      await AsyncStorage.setItem('@hobbyProgress', JSON.stringify(allProgress));
+  
+      setProgress(newProgress);
+      setShowAddYourProgressModal(false);
+      
+      if (navigation.isFocused()) {
+        setProgress(prev => ({ ...prev }));
+      }
+    } catch (e) {
+      console.error('Ошибка сохранения прогресса', e);
+    }
+  };
+
+  const handleDeleteHobby = async () => {
+    try {
+      const savedHobbies = await AsyncStorage.getItem('@hobbies');
+      if (savedHobbies) {
+        const hobbies = JSON.parse(savedHobbies);
+        const updatedHobbies = hobbies.filter((h: Hobby) => h.name !== params?.hobbyName);
+        await AsyncStorage.setItem('@hobbies', JSON.stringify(updatedHobbies));
+      }
+
+      await AsyncStorage.multiRemove([
+        `@hobbyGoals_${params?.hobbyName}`,
+        `@hobbyProgress_${params?.hobbyName}`,
+        `@selectedDates_${hobbyName}`
+      ]);
+  
+      navigation.navigate('Hobbies');
+    } catch (e) {
+      console.error('Ошибка удаления хобби', e);
+    }
   };
 
 
@@ -85,26 +247,19 @@ const SettingScreen = () => {
 
   const handleDayPress = (day: number) => {
     const monthKey = `${currentYear}-${currentMonth}`;
-
+    
     setSelectedDates(prev => {
       const currentMonthDates = prev[monthKey] || [];
       const newDates = currentMonthDates.includes(day)
         ? currentMonthDates.filter(d => d !== day)
         : [...currentMonthDates, day];
-
-      const allSelected = Object.entries(prev)
-        .filter(([key]) => key !== monthKey)
-        .reduce((acc, [key, days]) => {
-          const [y, m] = key.split('-');
-          return [...acc, ...days.map(d => `${d}.${parseInt(m) + 1}.${y}`)];
-        }, newDates.map(d => `${d}.${currentMonth + 1}.${currentYear}`));
-
-      console.log('Выбранные даты:', allSelected.join(', '));
-
-      return {
+      
+      const updatedDates = {
         ...prev,
         [monthKey]: newDates
       };
+      
+      return updatedDates;
     });
   };
 
@@ -121,20 +276,48 @@ const SettingScreen = () => {
         </View>
 
         <View style={styles.paintOpacityArtContainer}>
-          <PaintOpacityArt />
+          <Image
+            source={params?.hobbyImage || defaultImage}
+            style={{
+              width: 320,
+              height: 320,
+              opacity: 0.15
+            }}
+          />
         </View>
 
         <View style={styles.whiteRectangleContainer}>
           <WhiteRectangle />
+          <View style={styles.yourGoal}>
+            <Text style={styles.yourGoalText}>{goalText}</Text>
+          </View>
+
+          {/* Прогресс текст */}
+          <View style={styles.progressTextContainer}>
+            <Text style={styles.progressText}>
+              {progress.current} из {progress.target || '?'}
+            </Text>
+          </View>
+
+          {/* Прогресс бар */}
+          <View style={styles.progressBarContainer}>
+            <View 
+              style={[
+                styles.progressBarFill,
+                { 
+                  width: `${progress.target > 0 
+                    ? Math.min(100, (progress.current / progress.target) * 100) 
+                    : 0}%` 
+                }
+              ]}
+            />
+          </View>
 
           <View style={styles.tabsContainer}>
             <View style={styles.buttonsRow}>
               <TouchableOpacity
                 style={styles.tabButton}
-                onPress={() => {
-                  setActiveTab('tracking');
-                  navigation.navigate('Drawing');
-                }}
+                onPress={handleBackToTracking}
               >
                 <Text style={[
                   styles.tabButtonText,
@@ -177,8 +360,8 @@ const SettingScreen = () => {
             </View>
           </View>
         </View>
-
-        <View style={styles.settingsContent}>
+        
+        <ScrollView style={styles.settingsContent}>
           <View style={styles.calendarContainer}>
             <View style={styles.monthHeader}>
               <TouchableOpacity style={styles.monthNavButton} onPress={handlePrevMonth}>
@@ -218,7 +401,6 @@ const SettingScreen = () => {
             ))}
           </View>
 
-          {/* Серая линия */}
           <View style={styles.divider} />
 
           {/* Напоминания + переключатель */}
@@ -229,22 +411,39 @@ const SettingScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Серая линия */}
           <View style={styles.divider} />
 
           {/* Кнопки действий */}
           <View style={styles.actionButtonsRow}>
-            <TouchableOpacity style={styles.buttonOnSettings}>
+            <TouchableOpacity 
+              style={styles.buttonOnSettings}
+              onPress={() => setShowAddYourProgressModal(true)}
+            >
               <Text style={styles.buttonTextOnSettings}>Добавить</Text>
               <Text style={styles.buttonTextOnSettings}>прогресс</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonOnSettings}>
+            <TouchableOpacity 
+              style={styles.buttonOnSettings}
+              onPress={() => setShowChangeGoalModal(true)}
+            >
               <Text style={styles.buttonTextOnSettings}>Изменить</Text>
               <Text style={styles.buttonTextOnSettings}>цель</Text>
             </TouchableOpacity>
+            
           </View>
-        </View>
+          
+          <TouchableOpacity 
+            style={styles.buttonOfDeleteHobby}
+            onPress={handleDeleteHobby}
+          >
+            <Text style={styles.buttonTextOnSettings}>Удалить хобби</Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.buttonTextOnSettings, { opacity: 0 }]}>
+          </Text>
+
+        </ScrollView >
 
         <TouchableOpacity
           style={styles.ThreeStripedButton}
@@ -254,8 +453,126 @@ const SettingScreen = () => {
         </TouchableOpacity>
 
         <View style={styles.PaintScreenText}>
-          <Text style={styles.PaintScreenTextFonts}>рисование</Text>
+          <Text style={styles.PaintScreenTextFonts}>{hobbyName}</Text>
         </View>
+      
+        {showChangeGoalModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.newHobbyModal}>
+              {/* Крестик закрытия */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowChangeGoalModal(false)}
+              >
+                <CloseCreatingHobbyIcon />
+              </TouchableOpacity>
+
+              {/* Заголовок */}
+              <View style={styles.modalHeaderGoal}>
+                <Text style={styles.modalTitle}>Изменить цель</Text>
+              </View>
+
+              {/* Блок с иконкой и полем ввода */}
+              <View style={styles.inputContainer}>
+                <View style={styles.textInputWrapper}>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Введи свою цель"
+                    placeholderTextColor="#999"
+                    value={inputText}
+                    onChangeText={setInputText}
+                  />
+                  <View style={styles.underline} />
+                </View>
+              </View>
+
+              {/* Кнопка подтверждения */}
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleChangeGoal}
+
+              >
+                <Text style={styles.confirmButtonText}>Изменить</Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
+        )}
+
+        {showAddYourProgressModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.newHobbyModal}>
+              {/* Крестик закрытия */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowAddYourProgressModal(false)}
+              >
+                <CloseCreatingHobbyIcon />
+              </TouchableOpacity>
+
+              {/* Заголовок */}
+              <View style={styles.modalHeaderProgress}>
+                <Text style={styles.modalTitle}>Добавить прогресс</Text>
+              </View>
+
+              {/* Основной контент - поля ввода и прогресс бар */}
+              <View style={styles.progressContent}>
+                {/* Поля ввода в одну строку */}
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.numberInput}
+                    placeholder="0"
+                    keyboardType="numeric"
+                    value={modalProgress.current > 0 ? modalProgress.current.toString() : ''}
+                    onChangeText={(text) => {
+                      const num = parseInt(text) || 0;
+                      setModalProgress(prev => ({ ...prev, current: num }));
+                    }}
+                  />
+                  <Text style={styles.dividerText}>из</Text>
+                  <TextInput
+                    style={styles.numberInput}
+                    placeholder={isTargetLocked ? progress.target.toString() : "0"}
+                    keyboardType="numeric"
+                    value={isTargetLocked ? progress.target.toString() : (modalProgress.target > 0 ? modalProgress.target.toString() : '')}
+                    onChangeText={(text) => {
+                      if (!isTargetLocked) {
+                        const num = parseInt(text) || 0;
+                        setModalProgress(prev => ({ ...prev, target: num }));
+                      }
+                    }}
+                    editable={!isTargetLocked}
+                  />
+                </View>
+
+                {/* Прогресс бар сразу под полями ввода */}
+                <View style={styles.progressBarWrapper}>
+                  <View 
+                    style={[
+                      styles.progressBar,
+                      { 
+                        width: `${(() => {
+                          const target = isTargetLocked ? progress.target : modalProgress.target || 1;
+                          const current = progress.current + modalProgress.current;
+                          return target > 0 ? Math.min(100, (current / target) * 100) : 0;
+                        })()}%`
+                      }
+                    ]}
+                  />
+                </View>
+              </View>
+
+              {/* Кнопка подтверждения */}
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleAddProgress}
+              >
+                <Text style={styles.confirmButtonText}>Добавить</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+        
       </View>
     </View>
   );

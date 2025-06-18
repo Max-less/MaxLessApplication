@@ -100,14 +100,17 @@ export const styles = StyleSheet.create({
     ThreeStripedButton: {
         position: 'absolute',
         top: 70,
-        left: 31,
+        left: 20,
         zIndex: 1,
     },
 
     PaintScreenText: {
         position: 'absolute',
-        top: 51,
-        left: 100,
+        top: 56,
+        width: 310,
+        alignItems: 'center',
+        marginLeft: 63,
+        height: 170
     },
 
     PaintScreenTextFonts: {
@@ -183,6 +186,43 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: '#62281B',
         fontFamily: 'IgraSans',
-    }
+    },
 
+    yourGoal: {
+        top: -135,
+        left: 20,
+    },
+
+    yourGoalText: {
+        fontSize: 22,
+        color: '#62281B',
+        fontFamily: 'IgraSans',
+    },
+    
+    progressTextContainer: {
+        marginTop: -130,
+        marginBottom: 5,
+        marginLeft: 23
+    },
+
+    progressText: {
+        fontSize: 16,
+        color: '#62281B',
+    },
+
+    progressBarContainer: {
+        height: 20,
+        backgroundColor: '#B0877463',
+        borderRadius: 10,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        overflow: 'hidden',
+    },
+
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: '#F57F40',
+        borderRadius: 10,
+        zIndex: 5
+    }
 });

@@ -139,6 +139,5 @@ export const styles = StyleSheet.create({
         textShadowColor: 'rgba(255, 255, 255, 0.75)',
         textShadowOffset: { width: 0.5, height: 0.5 },
         textShadowRadius: 1,
-    },
-    
+    }
 });

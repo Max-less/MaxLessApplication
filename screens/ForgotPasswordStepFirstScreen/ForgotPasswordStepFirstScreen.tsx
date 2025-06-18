@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -42,10 +42,6 @@ const ForgotPasswordStepFirstScreen = () => {
               style={styles.input}
             />
           </View>
-
-          
-
-          
 
           {/* Кнопка регистрации */}
           <TouchableOpacity

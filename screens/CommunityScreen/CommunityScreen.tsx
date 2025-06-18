@@ -144,8 +144,6 @@ const CommunityScreen = () => {
                                     <Text style={styles.createSocietyText}>Создать</Text>
                                 </View>
                             </TouchableOpacity>
-
-                            {/* Добавьте другие кнопки здесь, если нужно */}
                         </View>
 
                     </View>
@@ -220,7 +218,6 @@ const CommunityScreen = () => {
                         style={styles.BackToMainButton}
                         onPress={() => navigation.goBack()}
                     >
-                        {/* Используем текущий route.name вместо navigation.navigate */}
                         {navigation.getState()?.routes[navigation.getState().index]?.name === 'Hobbies'
                             ? <ActiveBackToMainIcon />
                             : <BackToMainIcon />

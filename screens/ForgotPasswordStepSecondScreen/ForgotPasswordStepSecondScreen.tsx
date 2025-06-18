@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
 
 
 import { useNavigation } from '@react-navigation/native';
@@ -53,10 +53,6 @@ const ForgotPasswordStepSecondScreen = () => {
             />
           </View>
 
-
-
-
-
           {/* Кнопка регистрации */}
           <TouchableOpacity
             style={styles.mainButton}
@@ -76,7 +72,6 @@ const ForgotPasswordStepSecondScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.newHobbyModal}>
               
-
               {/* Заголовок */}
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Готово!</Text>
@@ -89,7 +84,6 @@ const ForgotPasswordStepSecondScreen = () => {
                   аккаунт снова.
                 </Text>
               </View>
-
 
               {/* Кнопка подтверждения */}
               <TouchableOpacity

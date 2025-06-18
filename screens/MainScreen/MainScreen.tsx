@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Image, ImageBackground, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import React from 'react';
+import { View, Text, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { Input } from '../../shared/input/Input';
 
 
