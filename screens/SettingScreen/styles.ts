@@ -452,5 +452,16 @@ export const styles = StyleSheet.create({
 
   selectedDayText: {
     color: '#fff',
+  },
+
+  selectedDateContainer: {
+    marginTop: -10,
+    marginLeft: 22,
+  },
+
+  selectedDateText: {
+    fontSize: 16,
+    color: '#62281B',
+    fontFamily: 'IgraSans',
   }
 });

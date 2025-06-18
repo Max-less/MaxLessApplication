@@ -40,10 +40,29 @@ const SettingScreen = () => {
   const [isSwitchOn, setIsSwitchOn] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(4);
   const [currentYear, setCurrentYear] = useState(2025);
-  const [selectedDates, setSelectedDates] = useState<{[key: string]: number[]}>({});
   const [showChangeGoalModal, setShowChangeGoalModal] = useState(false);
   const [showAddYourProgressModal, setShowAddYourProgressModal] = useState(false);
 
+
+  // AsyncStorage.removeItem('@settings');
+  // AsyncStorage.clear();
+
+  const [selectedDates, setSelectedDates] = useState<{[key: string]: number | null}>({});
+  const [selectedDate, setSelectedDate] = useState<{monthKey: string, day: number} | null>(null);
+
+  const [showSelectedDate, setShowSelectedDate] = useState(false);
+
+  const formatSelectedDate = () => {
+    if (!selectedDate) return "";
+    
+    const months = [
+      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+    ];
+    
+    const [year, month] = selectedDate.monthKey.split('-').map(Number);
+    return `до ${selectedDate.day} ${months[month]} ${year} года`;
+  };
   
 
   const route = useRoute<RouteProp<RootStackParamList, 'Settings'>>();
@@ -59,14 +78,29 @@ const SettingScreen = () => {
   const handleChangeGoal = async () => {
     if (inputText.trim()) {
       try {
+        // Сохраняем новую цель
         const savedGoals = await AsyncStorage.getItem('@hobbyGoals');
         const goals = savedGoals ? JSON.parse(savedGoals) : {};
         goals[params?.hobbyName || ''] = inputText;
         await AsyncStorage.setItem('@hobbyGoals', JSON.stringify(goals));
         
+        const newProgress = { current: 0, target: 0 };
+        const savedProgress = await AsyncStorage.getItem('@hobbyProgress');
+        const allProgress = savedProgress ? JSON.parse(savedProgress) : {};
+        allProgress[params?.hobbyName || ''] = newProgress;
+        await AsyncStorage.setItem('@hobbyProgress', JSON.stringify(allProgress));
+
         setGoalText(inputText);
+        setProgress(newProgress);
         setInputText('');
         setShowChangeGoalModal(false);
+        setIsTargetLocked(false);
+        
+        setModalProgress({ current: 0, target: 0 });
+
+        if (selectedDate) {
+          setShowSelectedDate(true);
+        }
       } catch (e) {
         console.error('Ошибка сохранения цели', e);
       }
@@ -121,7 +155,18 @@ const SettingScreen = () => {
       try {
         const savedDates = await AsyncStorage.getItem(`@selectedDates_${hobbyName}`);
         if (savedDates) {
-          setSelectedDates(JSON.parse(savedDates));
+          const parsedDates = JSON.parse(savedDates);
+          setSelectedDates(parsedDates);
+          
+          for (const monthKey in parsedDates) {
+            if (parsedDates[monthKey] !== null) {
+              setSelectedDate({
+                monthKey,
+                day: parsedDates[monthKey]
+              });
+              break;
+            }
+          }
         }
       } catch (e) {
         console.error('Ошибка загрузки дат', e);
@@ -249,23 +294,22 @@ const SettingScreen = () => {
     const monthKey = `${currentYear}-${currentMonth}`;
     
     setSelectedDates(prev => {
-      const currentMonthDates = prev[monthKey] || [];
-      const newDates = currentMonthDates.includes(day)
-        ? currentMonthDates.filter(d => d !== day)
-        : [...currentMonthDates, day];
+      const newDates = Object.keys(prev).reduce((acc, key) => {
+        acc[key] = null;
+        return acc;
+      }, {} as {[key: string]: number | null});
       
-      const updatedDates = {
-        ...prev,
-        [monthKey]: newDates
-      };
+      newDates[monthKey] = day;
+
+      setSelectedDate({ monthKey, day });
       
-      return updatedDates;
+      return newDates;
     });
   };
 
   const isDaySelected = (day: number) => {
     const monthKey = `${currentYear}-${currentMonth}`;
-    return selectedDates[monthKey]?.includes(day) || false;
+    return selectedDates[monthKey] === day;
   };
 
   return (
@@ -312,6 +356,14 @@ const SettingScreen = () => {
               ]}
             />
           </View>
+
+          {showSelectedDate && selectedDate && (
+            <View style={styles.selectedDateContainer}>
+              <Text style={styles.selectedDateText}>
+                {formatSelectedDate()}
+              </Text>
+            </View>
+          )}
 
           <View style={styles.tabsContainer}>
             <View style={styles.buttonsRow}>
@@ -515,7 +567,6 @@ const SettingScreen = () => {
                 <Text style={styles.modalTitle}>Добавить прогресс</Text>
               </View>
 
-              {/* Основной контент - поля ввода и прогресс бар */}
               <View style={styles.progressContent}>
                 {/* Поля ввода в одну строку */}
                 <View style={styles.inputRow}>

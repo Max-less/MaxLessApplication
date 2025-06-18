@@ -5,14 +5,14 @@ export const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
-    
+
     UpperPanel: {
         position: 'absolute',
         top: '0%',
         width: '100%',
         left: '2%',
         transform: [{ scaleX: 1.06 }],
-    }, 
+    },
 
     scrollContainer: {
         flex: 1,
@@ -67,13 +67,14 @@ export const styles = StyleSheet.create({
     },
 
     descriptionContainer: {
-        width: 370,
+        // width: 370,
         height: 79,
         marginTop: 10,
         marginHorizontal: 15,
         borderRadius: 20,
         backgroundColor: '#FEE5CE',
         padding: 15,
+        minHeight: 79,
     },
 
     descriptionTitle: {
@@ -89,15 +90,15 @@ export const styles = StyleSheet.create({
         color: '#62281B',
         fontWeight: 'bold',
         fontFamily: 'IdealistSans',
-        fontSize: 14,
+        fontSize: 15,
         marginTop: 5,
-        width: 350,
-        height: 40,
+        marginLeft: -4,
+        marginBottom: 4,
     },
 
     buttonsContainers: {
         paddingHorizontal: 16,
-        marginTop: 20,
+        marginTop: 10,
     },
 
     subscribeButton: {
@@ -150,7 +151,7 @@ export const styles = StyleSheet.create({
         fontSize: 20,
         opacity: 0.5,
     },
-    
+
     activeNewPostButtonText: {
         color: '#62281B',
         opacity: 1,
@@ -217,7 +218,7 @@ export const styles = StyleSheet.create({
         padding: 16,
         marginLeft: 15,
     },
-      
+
     postHeader: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -296,5 +297,16 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginLeft: 20,
+    },
+
+    expandedDescriptionContainer: {
+        minHeight: 150,
+        paddingBottom: 15,
+    },
+    
+    descriptionOuterContainer: {
+        width: '100%',
+        paddingHorizontal: 15,
+        marginTop: 20,
     }
 });

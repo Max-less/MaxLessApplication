@@ -18,10 +18,17 @@ const CommunityDetailsScreen = () => {
   const navigation = useNavigation();
 
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const handleSubscribePress = () => {
     setIsSubscribed(!isSubscribed);
   };
+
+  const toggleDescription = () => {
+    setIsDescriptionExpanded(!isDescriptionExpanded);
+  };
+
+  const fullDescription = "Добро пожаловать в уголок визуальной магии! Здесь каждый кадр — история, каждое фото — настроение. Делимся снимками, вдохновляемся и просто наслаждаемся красотой через объектив.";
 
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
@@ -53,12 +60,22 @@ const CommunityDetailsScreen = () => {
         </View>
 
         {/* Описание сообщества */}
-        <View style={styles.descriptionContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.descriptionContainer,
+            isDescriptionExpanded && styles.expandedDescriptionContainer
+          ]}
+          onPress={toggleDescription}
+          activeOpacity={0.7}
+        >
           <Text style={styles.descriptionTitle}>Описание</Text>
-          <Text style={styles.descriptionText}>
-            Добро пожаловать в уголок визуальной магии! Здесь каждый кадр — история, каждое фото...
+          <Text 
+            style={styles.descriptionText}
+            numberOfLines={isDescriptionExpanded ? undefined : 3}
+          >
+            {fullDescription}
           </Text>
-        </View>
+        </TouchableOpacity>
 
         {/* Кнопки */}
         <View style={styles.buttonsContainers}>

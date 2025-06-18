@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
@@ -11,6 +11,8 @@ import EyeClosedIcon from "../../assets/icons/EyeClosedIcon";
 import EyeOpenedIcon from "../../assets/icons/EyeOpenedIcon";
 import SwitchOffIcon from '../../assets/icons/SwitchOffIcon';
 import SwitchOnIcon from '../../assets/icons/SwitchOnIcon';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -29,7 +31,50 @@ const ProfileScreen = () => {
     postComments: true
   });
 
+  const [nickname, setNickname] = useState('nickname');
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const nicknameInputRef = useRef<TextInput>(null);
+
   const navigation = useNavigation<ProfileScreenNavigationProp>();
+
+  useEffect(() => {
+    const loadNickname = async () => {
+      try {
+        const savedNickname = await AsyncStorage.getItem('userNickname');
+        if (savedNickname) {
+          setNickname(savedNickname);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке никнейма:', error);
+      }
+    };
+    
+    loadNickname();
+  }, []);
+
+  // Сохранение никнейма
+  const saveNickname = async () => {
+    try {
+      await AsyncStorage.setItem('userNickname', nickname);
+      setIsEditingNickname(false);
+    } catch (error) {
+      console.error('Ошибка при сохранении никнейма:', error);
+    }
+  };
+
+  // Активация редактирования никнейма
+  const handleEditNickname = () => {
+    setIsEditingNickname(true);
+    setTimeout(() => {
+      nicknameInputRef.current?.focus();
+    }, 100);
+  };
+
+  // Обработка нажатия "Готово" на клавиатуре
+  const handleSubmitEditing = () => {
+    saveNickname();
+  };
+
 
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
@@ -61,7 +106,7 @@ const ProfileScreen = () => {
 
         {/* Никнейм */}
         <View style={styles.nicknameContainer}>
-          <Text style={styles.nickname}>nickname</Text>
+          <Text style={styles.nickname}>User</Text>
           <TouchableOpacity>
             <ChangeNickNameIcon />
           </TouchableOpacity>

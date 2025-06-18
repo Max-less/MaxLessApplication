@@ -152,5 +152,17 @@ export const styles = StyleSheet.create({
 
   switchContainer: {
     padding: 10,
+  },
+
+  nicknameInput: {
+    fontSize: 32,
+    color: '#62281B',
+    marginRight: 10,
+    fontFamily: 'IgraSans',
+    textAlign: 'center',
+  },
+
+  editButton: {
+    marginLeft: 5,
   }
 });
