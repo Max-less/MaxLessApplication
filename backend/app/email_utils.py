@@ -123,3 +123,55 @@ def send_welcome_email(email: str, user_name: str) -> bool:
     except Exception as e:
         logger.error(f"Ошибка отправки приветственного письма на {email}: {e}")
         return False
+
+def send_verification_code_email(email: str, code: str) -> bool:
+    try:
+        from .config import settings
+        import resend
+        resend.api_key = settings.resend_api_key
+        html_content = f"""
+        <div style='font-family: Arial, sans-serif;'>
+            <h2>Ваш код подтверждения</h2>
+            <p>Введите этот код в приложении:</p>
+            <div style='font-size: 32px; letter-spacing: 8px; font-weight: bold; color: #FF9800;'>{code}</div>
+            <p style='color: #888; font-size: 12px;'>Код действует 10 минут.</p>
+        </div>
+        """
+        params = {
+            "from": f"{settings.resend_from_name} <{settings.resend_from_email}>",
+            "to": [email],
+            "subject": f"Код подтверждения для {settings.resend_from_name}",
+            "html": html_content,
+        }
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        import logging
+        logging.error(f"Ошибка отправки кода на {email}: {e}")
+        return False
+
+def send_reset_code_email(email: str, code: str) -> bool:
+    try:
+        from .config import settings
+        import resend
+        resend.api_key = settings.resend_api_key
+        html_content = f"""
+        <div style='font-family: Arial, sans-serif;'>
+            <h2>Сброс пароля</h2>
+            <p>Введите этот код для сброса пароля:</p>
+            <div style='font-size: 32px; letter-spacing: 8px; font-weight: bold; color: #FF9800;'>{code}</div>
+            <p style='color: #888; font-size: 12px;'>Код действует 10 минут.</p>
+        </div>
+        """
+        params = {
+            "from": f"{settings.resend_from_name} <{settings.resend_from_email}>",
+            "to": [email],
+            "subject": f"Код для сброса пароля в {settings.resend_from_name}",
+            "html": html_content,
+        }
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        import logging
+        logging.error(f"Ошибка отправки кода сброса на {email}: {e}")
+        return False

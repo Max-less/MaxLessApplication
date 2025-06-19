@@ -12,7 +12,9 @@ import RegistrationPreSuccessScreen from './screens/RegistrationPreSuccessScreen
 import SettingScreen from './screens/SettingScreen/SettingScreen';
 import MainScreen from './screens/MainScreen/MainScreen';
 import ForgotPasswordStepFirstScreen from './screens/ForgotPasswordStepFirstScreen/ForgotPasswordStepFirstScreen';
+import ForgotPasswordStepFirstWithHalfScreen from './screens/ForgotPasswordStepFirstWithHalfScreen/ForgotPasswordStepFirstWithHalfScreen';
 import ForgotPasswordStepSecondScreen from './screens/ForgotPasswordStepSecondScreen/ForgotPasswordStepSecondScreen';
+
 
 
 
@@ -38,6 +40,7 @@ export default function AppNavigator() {
       <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccessScreen} />
       <Stack.Screen name="RegistrationPreSuccess" component={RegistrationPreSuccessScreen} />
       <Stack.Screen name="ForgotPasswordStepFirst" component={ForgotPasswordStepFirstScreen} />
+      <Stack.Screen name="ForgotPasswordStepFirstWithHalf" component={ForgotPasswordStepFirstWithHalfScreen} />
       <Stack.Screen name="ForgotPasswordStepSecond" component={ForgotPasswordStepSecondScreen} />
     </Stack.Navigator>
   );

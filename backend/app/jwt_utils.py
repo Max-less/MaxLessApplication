@@ -29,5 +29,5 @@ def verify_email_token(token: str) -> Optional[dict]:
 def create_verification_link(user_email: str, user_id: str) -> str:
     """Создает ссылку для верификации email"""
     token = create_verification_token(user_email, user_id)
-    verification_link = f"{settings.frontend_url}/verify-email?token={token}"
+    verification_link = f"myapp://confirm?token={token}"
     return verification_link

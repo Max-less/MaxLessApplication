@@ -1,18 +1,49 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from './styles';
-import { RegistrationPreSuccessScreenNavigationProp } from '../../types';
+import { ForgotPasswordStepFirstNavigationProp } from '../../types';
 
-const RegistrationPreSuccessScreen = () => {
+const ForgotPasswordStepFirstWithHalfScreen = () => {
   const [pressed, setPressed] = useState(false);
   const [code, setCode] = useState(['', '', '', '', '', '']);
-  const [loading, setLoading] = useState(false);
-  const navigation = useNavigation<RegistrationPreSuccessScreenNavigationProp>();
+  const [error, setError] = useState('');
+  const navigation = useNavigation<ForgotPasswordStepFirstNavigationProp>();
+  const route = useRoute();
+  const { email } = route.params as { email: string };
   const inputsRef = useRef<Array<TextInput | null>>([]);
 
-  const route = useRoute();
-  const email = (route.params && (route.params as any).email) || '';
+  const goToSecondStep = async () => {
+    setError('');
+    const codeStr = code.join('');
+    if (codeStr.length !== 6) {
+      setError('Введите 6-значный код');
+      return;
+    }
+    try {
+      const response = await fetch('http://192.168.56.1:8000/auth/verify-reset-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: codeStr }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        let errorMsg = 'Неверный код';
+        if (typeof data.detail === 'string') {
+          errorMsg = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          errorMsg = data.detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
+        } else if (typeof data.detail === 'object' && data.detail !== null) {
+          errorMsg = JSON.stringify(data.detail);
+        }
+        setError(errorMsg);
+      } else {
+        navigation.navigate('ForgotPasswordStepSecond', { email, code: codeStr } as any);
+      }
+    } catch (e) {
+      setError('Ошибка сети');
+    }
+  };
 
   const handlePress = () => {
     setPressed(true);
@@ -41,32 +72,6 @@ const RegistrationPreSuccessScreen = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (code.join('').length !== 6) return;
-    setLoading(true);
-    try {
-      const response = await fetch('http://192.168.56.1:8000/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: code.join('') })
-      });
-      if (response.ok) {
-        navigation.navigate('RegistrationSuccess', { email });
-      } else {
-        const error = await response.json();
-        let message = error.detail;
-        if (Array.isArray(message)) {
-          message = message.map((e: any) => e.msg).join('\n');
-        }
-        Alert.alert('Ошибка', message || 'Неверный код');
-      }
-    } catch (e) {
-      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <ImageBackground
       source={require('../../assets/background.png')}
@@ -77,7 +82,7 @@ const RegistrationPreSuccessScreen = () => {
       <View style={styles.container}>
         {/* Заголовок */}
         <View style={{ alignItems: 'center' }}>
-          <Text style={styles.registrationTitle}>Почти готово</Text>
+          <Text style={styles.registrationTitle}>Сброс пароля</Text>
         </View>
 
         <Text style={styles.emailConfirmationText}>
@@ -149,18 +154,18 @@ const RegistrationPreSuccessScreen = () => {
           ))}
         </View>
 
-
         {/* Кнопка регистрации */}
         <TouchableOpacity
           style={styles.mainButton}
-          onPress={handleSubmit}
-          disabled={code.join('').length !== 6 || loading}
+          onPress={goToSecondStep}
         >
-          <Text style={styles.mainButtonText}>{loading ? 'Проверяем...' : 'Подтвердить'}</Text>
+          <Text style={styles.mainButtonText}>Подтвердить</Text>
         </TouchableOpacity>
+
+        {error ? <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>{error}</Text> : null}
       </View>
     </ImageBackground>
   );
 }
 
-export default RegistrationPreSuccessScreen;
+export default ForgotPasswordStepFirstWithHalfScreen;

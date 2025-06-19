@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         padding: 35,
         justifyContent: 'center',
-        marginTop: -80,
+        marginTop: -50,
     },
 
     registrationTitle: {

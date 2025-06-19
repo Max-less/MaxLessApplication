@@ -9,10 +9,11 @@ export type RootStackParamList = {
   Drawing: { hobbyName?: string; hobbyImage?: any; isNew?: boolean };
   Settings: { hobbyName?: string; hobbyImage?: any };
   Registration: undefined;
-  RegistrationSuccess: undefined;
-  RegistrationPreSuccess: undefined;
+  RegistrationSuccess: { email: string };
+  RegistrationPreSuccess: { email: string };
   ForgotPasswordStepFirst: undefined;
-  ForgotPasswordStepSecond: undefined;
+  ForgotPasswordStepFirstWithHalf: { email: string };
+  ForgotPasswordStepSecond: { email: string; code: string };
 };
 
 export type HobbiesScreenNavigationProp = NativeStackNavigationProp<

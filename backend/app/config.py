@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     resend_api_key: str = "re_dhmYScGb_GyyGk6wia72XumyiMPtpAxSW"
-    resend_from_email: str = "onboarding@resend.dev"
+    resend_from_email: str = "no-reply@maxless.ru"
     resend_from_name: str = "Redly"
 
     frontend_url: str = "http://localhost:3000"

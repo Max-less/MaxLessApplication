@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, TextInput, Pressable, Alert } from 'react-native';
 
 import EyeClosedIcon from "../../assets/icons/EyeClosedIcon";
 import EyeOpenedIcon from "../../assets/icons/EyeOpenedIcon";
@@ -17,11 +17,63 @@ const RegistrationScreen = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
-  const goToPreSuccess = () => {
-    navigation.navigate('RegistrationPreSuccess');
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation<RegistrationScreenNavigationProp>();
+
+  const handleRegister = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.56.1:8000/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, password_confirm: passwordConfirm })
+      });
+      if (response.ok) {
+        navigation.navigate('RegistrationPreSuccess', { email });
+      } else {
+        const error = await response.json();
+        let message = error.detail;
+        if (Array.isArray(message)) {
+          message = message.map(e => e.msg).join('\n');
+        }
+        Alert.alert('Ошибка', message || 'Ошибка регистрации');
+      }
+    } catch (e) {
+      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (code.join('').length !== 6) return;
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.56.1:8000/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: code.join('') })
+      });
+      if (response.ok) {
+        navigation.navigate('RegistrationSuccess', { email });
+      } else {
+        const error = await response.json();
+        let message = error.detail;
+        if (Array.isArray(message)) {
+          message = message.map((e: any) => e.msg).join('\n');
+        }
+        Alert.alert('Ошибка', message || 'Неверный код');
+      }
+    } catch (e) {
+      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground
@@ -44,6 +96,8 @@ const RegistrationScreen = () => {
               placeholder=""
               placeholderTextColor="#999"
               keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
@@ -56,6 +110,8 @@ const RegistrationScreen = () => {
                 placeholder=""
                 placeholderTextColor="#999"
                 secureTextEntry={!isPasswordVisible}
+                value={password}
+                onChangeText={setPassword}
               />
               <Pressable
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -75,6 +131,8 @@ const RegistrationScreen = () => {
                 placeholder=""
                 placeholderTextColor="#999"
                 secureTextEntry={!isConfirmPasswordVisible}
+                value={passwordConfirm}
+                onChangeText={setPasswordConfirm}
               />
               <Pressable
                 onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
@@ -88,9 +146,10 @@ const RegistrationScreen = () => {
           {/* Кнопка регистрации */}
           <TouchableOpacity
             style={styles.mainButton}
-            onPress={goToPreSuccess}
+            onPress={handleRegister}
+            disabled={loading}
           >
-            <Text style={styles.mainButtonText}>Зарегистрироваться</Text>
+            <Text style={styles.mainButtonText}>{loading ? 'Регистрация...' : 'Зарегистрироваться'}</Text>
           </TouchableOpacity>
 
           {/* Кнопка возврата */}

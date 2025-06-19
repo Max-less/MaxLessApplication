@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         padding: 35,
         justifyContent: 'center',
-        marginTop: -250,
+        marginTop: -230,
     },
 
     content: {

@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         padding: 35,
         justifyContent: 'center',
-        marginTop: -290,
+        marginTop: -200,
     },
 
     content: {
@@ -71,6 +71,27 @@ export const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontFamily: 'IgraSans',
         fontSize: 22,
+        textShadowColor: 'rgba(255, 255, 255, 0.75)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
+    },
+
+    secondaryButton: {
+        width: 334,
+        height: 55,
+        borderRadius: 20,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#FF6F3B',
+        marginTop: 15,
+    },
+
+    secondaryButtonText: {
+        color: '#FF6F3B',
+        fontFamily: 'IgraSans',
+        fontSize: 20,
         textShadowColor: 'rgba(255, 255, 255, 0.75)',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 1,
