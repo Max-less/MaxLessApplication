@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, FlatList } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
 import WhiteRectangle from '../../assets/icons/WhiteRectangle';
@@ -20,6 +21,16 @@ import { RootStackParamList, DrawingScreenNavigationProp } from '../../types';
 const DrawingScreen = () => {
   const [activeTab, setActiveTab] = useState<'tracking' | 'settings'>('tracking');
   const [showNewNoteModal, setShowNewNoteModal] = useState(false);
+  const [newNoteType, setNewNoteType] = useState<null | 'text' | 'media'>(null);
+  const [newNoteText, setNewNoteText] = useState('');
+  const [newNoteImage, setNewNoteImage] = useState<string | null>(null);
+  const [notes, setNotes] = useState<
+    { id: string; date: string; text?: string; mediaUrl?: string }[]
+  >([
+    // Пример начальных заметок для теста:
+    // { id: '1', date: '23 апр. 2025 г.', text: 'Начал новый скетч' },
+    // { id: '2', date: '24 апр. 2025 г.', mediaUrl: 'https://i.imgur.com/0y8Ftya.jpg' },
+  ]);
   const [progress, setProgress] = useState({ current: 0, target: 0 });
   const [goalText, setGoalText] = useState('Скорее добавьте цель');
 
@@ -40,6 +51,45 @@ const DrawingScreen = () => {
       hobbyImage: params?.hobbyImage || require('../../assets/pictures/PaintArt.png')
     });
   };
+
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (flatListRef.current && notes.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [notes]);
+
+  // Загрузка заметок при открытии экрана
+  useEffect(() => {
+    const loadNotes = async () => {
+      try {
+        const hobbyName = params?.hobbyName || hobbyData.name;
+        const savedNotes = await AsyncStorage.getItem(`@notes_${hobbyName}`);
+        if (savedNotes) {
+          setNotes(JSON.parse(savedNotes));
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки заметок', e);
+      }
+    };
+    loadNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.hobbyName]);
+
+  // Сохраняем заметки при изменении
+  useEffect(() => {
+    const saveNotes = async () => {
+      try {
+        const hobbyName = params?.hobbyName || hobbyData.name;
+        await AsyncStorage.setItem(`@notes_${hobbyName}`, JSON.stringify(notes));
+      } catch (e) {
+        console.error('Ошибка сохранения заметок', e);
+      }
+    };
+    saveNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes, params?.hobbyName]);
 
   React.useEffect(() => {
     if (params) {
@@ -88,6 +138,28 @@ const DrawingScreen = () => {
     
     loadProgressData();
   }, [params?.hobbyName]);
+
+  const addNote = (note: { text?: string; mediaUrl?: string }) => {
+    setNotes(prev => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' }),
+        ...note,
+      },
+    ]);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setNewNoteImage(result.assets[0].uri);
+    }
+  };
 
   return (
     <View style={[styles.background, { backgroundColor: '#E2C7B6' }]}>
@@ -192,9 +264,45 @@ const DrawingScreen = () => {
           <Text style={styles.PaintScreenTextFonts}>{hobbyData.name}</Text>
         </View>
 
+        {/* Вкладка отслеживания */}
+        {activeTab === 'tracking' && (
+          <View style={{ flex: 2, maxHeight: 2000, marginHorizontal: 24, marginTop: 500, paddingBottom: 16 }}>
+            <FlatList
+              ref={flatListRef}
+              data={notes}
+              keyExtractor={item => item.id}
+              renderItem={({ item, index }) => (
+                <View style={{ marginBottom: 16 }}>
+                  {/* Дата */}
+                  {(index === 0 || notes[index - 1].date !== item.date) && (
+                    <Text style={{ color: '#A97C50', marginBottom: 4 }}>{item.date}</Text>
+                  )}
+                  {/* Текст */}
+                  {item.text && (
+                    <View style={{ backgroundColor: '#FBE7D0', borderRadius: 16, padding: 8, alignSelf: 'flex-start', marginBottom: 4 }}>
+                      <Text style={{ color: '#A97C50' }}>{item.text}</Text>
+                    </View>
+                  )}
+                  {/* Медиа */}
+                  {item.mediaUrl && (
+                    <Image source={{ uri: item.mediaUrl }} style={{ width: 180, height: 180, borderRadius: 16 }} />
+                  )}
+                </View>
+              )}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 16 }}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        )}
+
         <TouchableOpacity
           style={styles.CreateNewArtHobby}
-          onPress={() => setShowNewNoteModal(true)}
+          onPress={() => {
+            setShowNewNoteModal(true);
+            setNewNoteType(null);
+            setNewNoteText('');
+            setNewNoteImage(null);
+          }}
         >
           <NewHobbyIcon />
         </TouchableOpacity>
@@ -208,40 +316,101 @@ const DrawingScreen = () => {
             {/* Крестик закрытия */}
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setShowNewNoteModal(false)}
+              onPress={() => {
+                setShowNewNoteModal(false);
+                setNewNoteType(null);
+                setNewNoteText('');
+                setNewNoteImage(null);
+              }}
             >
               <CloseCreatingHobbyIcon />
             </TouchableOpacity>
-
             {/* Заголовок */}
-            <View style={[styles.modalHeader, { marginBottom: -10 }]}>
+            <View style={[styles.modalHeader, { marginBottom: -10 }]}> 
               <Text style={styles.modalTitle}>Новая заметка</Text>
             </View>
-
-            {/* Блок с иконками */}
-            <View style={[styles.iconsRow, { marginBottom: -10 }]}>
-              <TouchableOpacity
-                style={styles.iconContainer}
-                onPress={() => {
-                  // Логика сохранения заметки
-                  setShowNewNoteModal(false);
-                }}
-              >
-                <NewMediaNoteIcon />
-                <Text style={styles.iconText}>Медиа</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.iconContainer}
-                onPress={() => {
-                  setShowNewNoteModal(false);
-                }}
-              >
-                <NewTextNoteIcon />
-                <Text style={styles.iconText}>Текст</Text>
-              </TouchableOpacity>
-            </View>
-
+            {/* Выбор типа заметки */}
+            {!newNoteType && (
+              <View style={[styles.iconsRow, { marginBottom: -10 }]}> 
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={() => setNewNoteType('media')}
+                >
+                  <NewMediaNoteIcon />
+                  <Text style={styles.iconText}>Медиа</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={() => setNewNoteType('text')}
+                >
+                  <NewTextNoteIcon />
+                  <Text style={styles.iconText}>Текст</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {/* Ввод текстовой заметки */}
+            {newNoteType === 'text' && (
+              <View style={{ marginTop: 16 }}>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#E2C7B6',
+                    borderRadius: 12,
+                    padding: 10,
+                    minHeight: 60,
+                    color: '#A97C50',
+                    backgroundColor: '#FBE7D0',
+                  }}
+                  placeholder="Введите заметку"
+                  placeholderTextColor="#A97C50"
+                  value={newNoteText}
+                  onChangeText={setNewNoteText}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={{ marginTop: 16, alignSelf: 'flex-end', backgroundColor: '#FF9900', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 20 }}
+                  onPress={() => {
+                    if (newNoteText.trim()) {
+                      addNote({ text: newNoteText });
+                      setNewNoteText('');
+                      setNewNoteType(null);
+                      setShowNewNoteModal(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.confirmButtonText}>Сохранить</Text>
+                  </TouchableOpacity>
+              </View>
+            )}
+            {/* Ввод медиа-заметки */}
+            {newNoteType === 'media' && (
+              <View style={{ marginTop: 16, alignItems: 'center' }}>
+                {newNoteImage ? (
+                  <Image source={{ uri: newNoteImage }} style={{ width: 180, height: 180, borderRadius: 16, marginBottom: 12 }} />
+                ) : (
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#FBE7D0', borderRadius: 12, padding: 16, marginBottom: 12 }}
+                    onPress={pickImage}
+                  >
+                    <Text style={{ color: '#A97C50' }}>Выбрать изображение</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={{ marginTop: 8, alignSelf: 'flex-end', backgroundColor: '#FF9900', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 20 }}
+                  onPress={() => {
+                    if (newNoteImage) {
+                      addNote({ mediaUrl: newNoteImage });
+                      setNewNoteImage(null);
+                      setNewNoteType(null);
+                      setShowNewNoteModal(false);
+                    }
+                  }}
+                  disabled={!newNoteImage}
+                >
+                  <Text style={styles.confirmButtonText}>Сохранить</Text>
+                  </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       )}

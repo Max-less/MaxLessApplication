@@ -79,7 +79,7 @@ const MainScreen = () => {
 
                         <Input
                             isEmail
-                            placeholder="Ваш номер телефона или e-mail"
+                            placeholder="Ваш e-mail"
                             placeholderTextColor="#999"
                             value={email}
                             onChangeText={setEmail}

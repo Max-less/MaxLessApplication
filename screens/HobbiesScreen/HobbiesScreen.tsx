@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 import BackGroundGradientOrange from '../../assets/icons/BackGroundGradientOrange';
 import LogoIcon from '../../assets/icons/LogoIcon';
@@ -37,6 +38,7 @@ const HobbiesScreen = () => {
   interface Hobby {
     name: string;
     imageKey: HobbyImageKey;
+    imageUri?: string;
     status?: string;
     goal?: string;
   }
@@ -84,6 +86,8 @@ const HobbiesScreen = () => {
 
   const navigation = useNavigation<HobbiesScreenNavigationProp>();
 
+  const [newHobbyImage, setNewHobbyImage] = useState<string | null>(null);
+
   React.useEffect(() => {
     if (navigation.setAsMain) {
       navigation.setAsMain();
@@ -116,20 +120,31 @@ const HobbiesScreen = () => {
   // AsyncStorage.removeItem('@hobbies');
   // AsyncStorage.clear();
 
+  const pickHobbyImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setNewHobbyImage(result.assets[0].uri);
+    }
+  };
+
   const handleAddHobby = () => {
     const newHobby: Hobby = {
       name: hobbyName.trim() || "Новое хобби",
       imageKey: DEFAULT_IMAGE_KEY,
+      imageUri: newHobbyImage || undefined,
       status: 'Новое хобби'
     };
-    
     setHobbies([...hobbies, newHobby]);
     setHobbyName('');
+    setNewHobbyImage(null);
     setShowNewHobbyModal(false);
-    
     navigation.navigate('Drawing', {
       hobbyName: newHobby.name,
-      hobbyImage: HOBBY_IMAGES[newHobby.imageKey],
+      hobbyImage: newHobby.imageUri ? { uri: newHobby.imageUri } : HOBBY_IMAGES[newHobby.imageKey],
     });
   };
 
@@ -241,11 +256,11 @@ const HobbiesScreen = () => {
                 style={styles.hobbyItem}
                 onPress={() => navigation.navigate('Drawing', { 
                   hobbyName: hobby.name,
-                  hobbyImage: getHobbyImage(hobby.imageKey),
+                  hobbyImage: hobby.imageUri ? { uri: hobby.imageUri } : getHobbyImage(hobby.imageKey),
                 })}
               >
                 <Image
-                  source={getHobbyImage(hobby.imageKey)}
+                  source={hobby.imageUri ? { uri: hobby.imageUri } : getHobbyImage(hobby.imageKey)}
                   style={{ width: 50, height: 50 }}
                 />
                 <View style={styles.hobbyTextWrapper}>
@@ -275,7 +290,10 @@ const HobbiesScreen = () => {
             {/* Крестик закрытия */}
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setShowNewHobbyModal(false)}
+              onPress={() => {
+                setShowNewHobbyModal(false);
+                setNewHobbyImage(null);
+              }}
             >
               <CloseCreatingHobbyIcon />
             </TouchableOpacity>
@@ -287,11 +305,13 @@ const HobbiesScreen = () => {
 
             {/* Блок с иконкой и полем ввода */}
             <View style={styles.inputContainer}>
-
-              <View style={styles.addPictureIcon}>
-                <AddPictureOnCreatingHobby />
-              </View>
-
+              <TouchableOpacity style={styles.addPictureIcon} onPress={pickHobbyImage}>
+                {newHobbyImage ? (
+                  <Image source={{ uri: newHobbyImage }} style={{ width: 64, height: 64, borderRadius: 16 }} />
+                ) : (
+                  <AddPictureOnCreatingHobby />
+                )}
+              </TouchableOpacity>
               <View style={styles.textInputWrapper}>
                 <TextInput
                   style={styles.textInput}

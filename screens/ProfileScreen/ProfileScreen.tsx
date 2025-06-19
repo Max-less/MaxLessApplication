@@ -106,7 +106,7 @@ const ProfileScreen = () => {
 
         {/* Никнейм */}
         <View style={styles.nicknameContainer}>
-          <Text style={styles.nickname}>User</Text>
+          <Text style={styles.nickname}>Kotyara</Text>
           <TouchableOpacity>
             <ChangeNickNameIcon />
           </TouchableOpacity>
@@ -117,14 +117,14 @@ const ProfileScreen = () => {
           {/* Рамка для email */}
           <View style={styles.dataItemContainer}>
             <Text style={styles.dataLabel}>Эл. почта</Text>
-            <Text style={styles.dataValue}>email@example.com</Text>
+            <Text style={styles.dataValue}>eldar.minkhazev@urfu.me</Text>
           </View>
 
           {/* Рамка для пароля */}
           <View style={styles.dataItemContainer}>
             <Text style={styles.dataLabel}>Пароль</Text>
             <Text style={styles.dataValue}>
-              {passwordVisible ? 'password123' : '••••••••'}
+              {passwordVisible ? 'UrFUtop2025' : '•••••••••••'}
             </Text>
             <TouchableOpacity
               onPress={() => setPasswordVisible(!passwordVisible)}

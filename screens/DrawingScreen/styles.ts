@@ -224,5 +224,14 @@ export const styles = StyleSheet.create({
         backgroundColor: '#F57F40',
         borderRadius: 10,
         zIndex: 5
-    }
+    },
+
+    confirmButtonText: {
+        color: '#FFFFFF',
+        fontSize: 20,
+        fontFamily: 'IgraSans',
+        textShadowColor: 'rgba(255, 255, 255, 0.75)',
+        textShadowOffset: { width: 0.5, height: 0.5 },
+        textShadowRadius: 1,
+    },
 });

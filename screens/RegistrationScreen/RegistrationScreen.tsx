@@ -49,32 +49,6 @@ const RegistrationScreen = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (code.join('').length !== 6) return;
-    setLoading(true);
-    try {
-      const response = await fetch('http://192.168.56.1:8000/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: code.join('') })
-      });
-      if (response.ok) {
-        navigation.navigate('RegistrationSuccess', { email });
-      } else {
-        const error = await response.json();
-        let message = error.detail;
-        if (Array.isArray(message)) {
-          message = message.map((e: any) => e.msg).join('\n');
-        }
-        Alert.alert('Ошибка', message || 'Неверный код');
-      }
-    } catch (e) {
-      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <ImageBackground
       source={require('../../assets/background.png')}
@@ -90,7 +64,7 @@ const RegistrationScreen = () => {
 
           {/* Email */}
           <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Номер телефона или e-mail</Text>
+            <Text style={styles.label}>Ваш e-mail</Text>
             <TextInput
               style={styles.input}
               placeholder=""
@@ -100,6 +74,8 @@ const RegistrationScreen = () => {
               onChangeText={setEmail}
             />
           </View>
+
+          AsyncStorage.clear()
 
           {/* Пароль с иконкой глаза */}
           <View style={styles.inputWrapper}>
